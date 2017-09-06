@@ -1,0 +1,5 @@
+library(LRCUDA)
+library(snow)
+load("~/workspace/Colon.RData")
+result <- LRCUDA(colon[,1:2000], colon[,2001], error.threshhold = 62)
+save(result, file = "SingleGPUResult.RData")
