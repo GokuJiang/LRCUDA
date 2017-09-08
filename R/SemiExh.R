@@ -163,4 +163,4 @@ SemiExh <- function(x, y, error.threshhold = 0, fold = 10, device.id = 0, cl = N
     return(result.l) 
 }
 
-
+LRWithFixedValMG()

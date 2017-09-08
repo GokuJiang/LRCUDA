@@ -1,3 +1,4 @@
+library("snow")
 LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id = 0, cl = NULL){
     if(!is.matrix(x)){
         stop("x should be matrix type !")
@@ -10,6 +11,7 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     task.num <- choose(ncol(x), n.comb)
     x <- cbind(rep(1,length(y)), x) 
     device.num <- length(device.id)
+    
  
     if(is.null(cl)){
         
@@ -21,28 +23,26 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
         }
     }
     
-
+    ###待处理
     clusterEvalQ(cl,library(LRCUDA))
     para <- vector("list", device.num)
     task.piece <- floor(task.num / device.num)	
 
     for(i in 1:device.num){
         para[[i]] <- list(x = x, y = y, n.comb = n.comb, error.threshhold = error.threshhold, fold = fold, device.id = device.id[i], start = (i-1)*task.piece + 1, stop = i*task.piece)
-        #print(paste("device.id = ", device.id[i] ," start = ", (i-1)*task.piece + 1, " stop = ", i*task.piece))
-        
-        
     }
     if(para[[device.num]]$stop < task.num){
             para[[device.num]]$stop = task.num
     }
                
     result <- clusterApply(cl, para, LRMultipleGPU)
-    #stopCluster(cl)
     return(combineResult(result))
 }
 
 
-
+X=matrix(1:12,ncol=3,nrow=4)
+Y=c(1,3,4,5)
+LRCUDA(X,Y)
 
 
 

@@ -1,7 +1,8 @@
+dyn.load("~/LRCUDA/src/libLRCUDA.so")
 getGPUCount <- function(cl = NULL){
     if(is.null(cl)){
         count <- vector("list", 1)
-        count[[1]] <- .Call("getGPUCount")
+	count[[1]] <- .Call("getGPUCount")
         return(count)
     }else{
         clusterEvalQ(cl, library(LRCUDA))
@@ -20,3 +21,5 @@ getGPUIds <- function(cl = NULL){
     return(Ids)
 }
 
+getGPUIds()
+#getGPUIds()
