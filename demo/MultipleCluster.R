@@ -1,5 +1,0 @@
-library(LRCUDA)
-library(snow)
-load("~/workspace/Colon.RData")
-cl <- makeCluster(c("c0302","c0302", "c0302", "c0302", "c0305", "c0305", "c0305", "c0305", "c0306", "c0306", "c0306", "c0306"), type = "SOCK")
-result <- LRCUDA(colon[,1:2000], colon[,2001], error.threshhold = 62, device.id = c(0,1,2,3,0,1,2,3,0,1,2,3), cl = cl)

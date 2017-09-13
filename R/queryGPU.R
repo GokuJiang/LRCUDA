@@ -1,4 +1,4 @@
-dyn.load("~/LRCUDA/src/libLRCUDA.so")
+dyn.load("libLRCUDA.so")
 getGPUCount <- function(cl = NULL){
     if(is.null(cl)){
         count <- vector("list", 1)
@@ -21,5 +21,5 @@ getGPUIds <- function(cl = NULL){
     return(Ids)
 }
 
-getGPUIds()
+#getGPUIds()
 #getGPUIds()
