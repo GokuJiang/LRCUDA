@@ -1,4 +1,4 @@
-dyn.load("~/LRCUDA/src/libLRCUDA.so")
+dyn.load("~/Document/LRCUDA/src/libLRCUDA.so")
 getGPUCount <- function(cl = NULL){
     if(is.null(cl)){
         count <- vector("list", 1)

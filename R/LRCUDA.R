@@ -1,5 +1,6 @@
 library("snow")
-dyn.load("~/LRCUDA/src/libLRCUDA.so")
+dyn.load("~/Document/LRCUDA/src/libLRCUDA.so")
+
 LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id = 0, cl = NULL){
     if(!is.matrix(x)){
         stop("x should be matrix type !")
