@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "LRMultipleGPU <- function(para){\n     x <- para$x\n     y <- para$y\n     n.comb <- para$n.comb\n     error.threshhold <- para$error.threshhold\n     fold <- para$fold\n     device.id <- para$device.id\n     start <- para$start\n     stop <- para$stop\n\n     result <- .Call(\"LRCUDA\", t(x), y, as.integer(n.comb), as.integer(error.threshhold), as.integer(fold), as.integer(device.id), as.integer(start), as.integer(stop))\n     return(t(matrix(result, nrow = n.comb + 1)))\n     \n}\n",
+    "created" : 1504841701228.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2177002583",
+    "id" : "759580B6",
+    "lastKnownWriteTime" : 1398134548,
+    "last_content_update" : 1398134548,
+    "path" : "~/Documents/LRCUDA/R/LRMultipleGPU.R",
+    "project_path" : "R/LRMultipleGPU.R",
+    "properties" : {
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1504841676048.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "C7C18C31",
+    "lastKnownWriteTime" : 1398134548,
+    "last_content_update" : 1398134548,
+    "path" : "~/Documents/LRCUDA/R/chooseGPU.R",
+    "project_path" : "R/chooseGPU.R",
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

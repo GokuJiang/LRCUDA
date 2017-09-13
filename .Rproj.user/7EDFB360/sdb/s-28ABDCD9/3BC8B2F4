@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "dyn.load(\"~/Document/LRCUDA/src/libLRCUDA.so\")\ngetGPUCount <- function(cl = NULL){\n    if(is.null(cl)){\n        count <- vector(\"list\", 1)\n\tcount[[1]] <- .Call(\"getGPUCount\")\n        return(count)\n    }else{\n        clusterEvalQ(cl, library(LRCUDA))\n    \tcount <- clusterEvalQ(cl, .Call(\"getGPUCount\"))\n        return(count)\n    }\n}\n\ngenerateIds <- function(count){\n    return(0:(count-1))\n}\n\ngetGPUIds <- function(cl = NULL){\n    count <- getGPUCount(cl)\n    Ids <- lapply(count, generateIds)\n    return(Ids)\n}\n\ngetGPUIds()\n#getGPUIds()\n",
+    "created" : 1504841708169.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "41717923",
+    "id" : "3BC8B2F4",
+    "lastKnownWriteTime" : 1504841771,
+    "last_content_update" : 1504841771,
+    "path" : "~/Documents/LRCUDA/R/queryGPU.R",
+    "project_path" : "R/queryGPU.R",
+    "properties" : {
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

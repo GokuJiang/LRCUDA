@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "####  author:Qinghan Meng\n####  email:qinghan.meng@gmail.com\n#cv function is to generate training sets and test sets for k-fold validation \n\ncv <- function(y, fold){\n  lables <- unique(y)\n  groups <- list()\n  for(lable in lables){\n    group[[as.character(lable)]] <- which(y == lable)\n  }\n  \n}\n",
+    "created" : 1504841679147.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2076343046",
+    "id" : "C97F96E6",
+    "lastKnownWriteTime" : 1398134548,
+    "last_content_update" : 1398134548,
+    "path" : "~/Documents/LRCUDA/R/CV.R",
+    "project_path" : "R/CV.R",
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
