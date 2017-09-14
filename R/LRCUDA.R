@@ -1,8 +1,4 @@
-library("snow")
-dyn.load("~/LRCUDA/src/libLRCUDA.so")
-#library("LRCUDABase")
 
-@export
 LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id = 0, cl = NULL){
     if(!is.matrix(x)){
         stop("x should be matrix type !")
@@ -28,7 +24,7 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     }
     
     ###待处理
-    clusterEvalQ(cl,library("LRCUDABase"))
+    clusterEvalQ(cl,library("LRCUDA"))
 
 
    para <- vector("list", device.num)
@@ -46,9 +42,6 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
 }
 
 
-X=matrix(1:12,ncol=3,nrow=4)
-Y=c(1,3,4,5)
-LRCUDA(X,Y)
 
 
 

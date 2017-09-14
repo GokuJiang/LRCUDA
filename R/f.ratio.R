@@ -1,5 +1,5 @@
 
-@export
+
 cal.f.ratio <- function(feature, x, y){
   u.1 <- mean(x[y == 1, feature])
   v.1 <- var(x[y == 1, feature])
@@ -8,7 +8,6 @@ cal.f.ratio <- function(feature, x, y){
   return(((u.1 - u.0)^2) / (v.1 + v.0))
 }
 
-@export
 f.ratio <- function(x, y, rank){
   feature.f.ratio <- do.call("c", lapply(1:ncol(x), cal.f.ratio, x, y))
   gene.id <- 1:ncol(x)

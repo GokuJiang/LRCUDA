@@ -24,8 +24,8 @@
 #include<string.h>
 #include<cuda.h>
 #include<time.h>
-#include<R.h>
-#include<Rinternals.h>
+#include "R.h"
+#include "Rinternals.h"
 
 #define ATTR_NUM 10
 #define INST_NUM 1000

@@ -1,7 +1,6 @@
 #combine analysis result from cluster.
 #store the result as data frame type.
 
-@export
 combineResult <- function(result){
     
     #result is a list
