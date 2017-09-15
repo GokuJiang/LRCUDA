@@ -90,7 +90,7 @@ LRWithFixedValMG <- function(x, y, n.comb = 1, error.threshhold = 0 , fold = 10,
 
 
 
-SemiExh <- function(x, y, error.threshhold = 0, fold = 10, device.id = 0, cl = NULL){
+SemiExh <- function(x, y,n.comb =  3 ,error.threshhold = 0, fold = 10, device.id = 0, cl = NULL){
 
     ############################################################################
     #one feature: error.threshhold is set to half of training set num.
@@ -98,7 +98,7 @@ SemiExh <- function(x, y, error.threshhold = 0, fold = 10, device.id = 0, cl = N
 
     result.l <- list()
    # rand.index <- sample(1:length(y), length(y))
-    result.one <- LRCUDA(x = x, y = y, n.comb = 1, error.threshhold = length(y) / 2, fold = fold, device.id = device.id, cl = cl)
+    result.one <- LRCUDA(x = x, y = y, n.comb = n.comb, error.threshhold = length(y) / 2, fold = fold, device.id = device.id, cl = cl)
     if(nrow(result.one) == 0){
          print("use one feature can't statisfy the error threshhold")
          return(result.l)
@@ -118,7 +118,7 @@ SemiExh <- function(x, y, error.threshhold = 0, fold = 10, device.id = 0, cl = N
  
     fixed.features <- result.one[,1]
     #rand.index <- sample(1:length(y), length(y))    
-    result.two <- LRWithFixedValMG(x, y, n.comb = 1, error.threshhold = error.min.one, fold = fold, device.id = device.id , cl = cl, fixed.features = as.matrix(fixed.features))
+    result.two <- LRWithFixedValMG(x, y, n.comb = n.comb, error.threshhold = error.min.one, fold = fold, device.id = device.id , cl = cl, fixed.features = as.matrix(fixed.features))
     
     if(nrow(result.two) == 0){
         print("use two features can't satisfy the error theshhold")
@@ -142,7 +142,7 @@ SemiExh <- function(x, y, error.threshhold = 0, fold = 10, device.id = 0, cl = N
         print(paste("i = ", i))
         print(paste("fixed features num", nrow(fixed.features)))
         #rand.index <- sample(1:length(y), length(y))
-        result <- LRWithFixedValMG(x, y, n.comb = 1, error.threshhold = error.para, fold = fold, device.id = device.id ,cl = cl, fixed.features = as.matrix(fixed.features))
+        result <- LRWithFixedValMG(x, y, n.comb = n.comb, error.threshhold = error.para, fold = fold, device.id = device.id ,cl = cl, fixed.features = as.matrix(fixed.features))
         
         if(nrow(result) == 0){
             print(paste("use", i+1 ,  "feature can't statisfy the error threshhold"))
