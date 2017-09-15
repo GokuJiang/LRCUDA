@@ -21,6 +21,6 @@ x = matrix(as.numeric(mat[2:63,2:2001]),ncol=2000,byrow=TRUE)
 
 #result <- LRCUDA(x,y,error.threshhold = 62,num.comb =3, device.id = c(0,1,2,3,0,1,2,3,0,1,2,3))
 result <- SemiExh(x, y, error.threshhold = 15, fold = 5, device.id = c(0,1,2,3,0,1,2,3,0,1,2,3), cl = NULL)
-save(result, file = "MultipleClusterResult.txt")
+save(as.martix(result), file = "MultipleClusterResult.txt")
 print(result)
 
