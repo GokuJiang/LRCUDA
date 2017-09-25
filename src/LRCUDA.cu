@@ -1855,20 +1855,19 @@ extern "C"{
 SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP error_threshhold, SEXP fold, SEXP device_id, SEXP start, SEXP stop){
 
     cudaSetDevice(*INTEGER(device_id));
-	cv.error_threshhold = *(INTEGER(error_threshhold));
+    cv.error_threshhold = *(INTEGER(error_threshhold));
 	//printf("%f\n", cv.error_threshhold);
-	cv.fold = *INTEGER(fold);
+    cv.fold = *INTEGER(fold);
 	//printf("%d\n", cv.fold);
 	//printf("I am here\n");
-	InitDeviceData(x,y);
+    InitDeviceData(x,y);
 
     InitGridBlock(65535,64);
     //InitGridBlock(256,64);
 	//InitResult();
     n_comb = *INTEGER(num_comb);
-	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
-
-	SEXP result = TransferResultToR();
+    SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
+    SEXP result = TransferResultToR();
 	return result;
 
 

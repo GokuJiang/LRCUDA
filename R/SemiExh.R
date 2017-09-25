@@ -103,6 +103,7 @@ SemiExh <- function(x, y,n.comb =  3 ,error.threshhold = 0, fold = 10, device.id
          print("use one feature can't statisfy the error threshhold")
          return(result.l)
     }
+    print(result.one)
     result.l[[1]] <- result.one
     error.min.one <- min(result.one$error)
     print(paste("error.min.one", error.min.one))
@@ -124,6 +125,8 @@ SemiExh <- function(x, y,n.comb =  3 ,error.threshhold = 0, fold = 10, device.id
         print("use two features can't satisfy the error theshhold")
         return(result.l)
     }
+        
+    print(result.two)
     result.l[[2]] <- result.two    
     error.min.two <- min(result.two$error)
     if(error.min.two <= error.threshhold){
