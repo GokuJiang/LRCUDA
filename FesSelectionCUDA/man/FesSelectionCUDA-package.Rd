@@ -10,7 +10,7 @@ There is a features selection algorithm to solve gene data which has a "big p sm
 }
 \details{
 \tabular{ll}{
-Package: \tab LRCUDA\cr
+Package: \tab FesSelectionCUDA\cr
 Type: \tab Package\cr
 Version: \tab 0.1\cr
 Date: \tab 2017-09-25\cr
@@ -19,7 +19,7 @@ License: \tab GPL-2\cr
 }
 
 \author{
-Goku, Ruiquan Ge
+Ruiquan Ge,Qinghan Meng ,Goku
 Maintainer:Goku<jym775096422@gmail.com>
 }
 
