@@ -1,0 +1,9 @@
+FesSelectionCUDA-package
+                        A gene feature selection algorithm.
+LRCUDA                  An incremental feature selection algorithm for
+                        gene expression profile. We implement it using
+                        logistic regression which is accelerated by
+                        NVIDIA GPU technology.
+f.ratio                 Screen features by fisher's ratio(statistic).
+getGPU                  Get GPU device IDs from localhost or a cluster.
+rm.bias                 Remove the bias of selected features by iFes.

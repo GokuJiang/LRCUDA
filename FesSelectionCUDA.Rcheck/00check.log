@@ -1,0 +1,129 @@
+* using log directory ‘/home/mzp/goku_LRCUDA_Floder/LRCUDA/FesSelectionCUDA.Rcheck’
+* using R version 3.2.3 (2015-12-10)
+* using platform: x86_64-pc-linux-gnu (64-bit)
+* using session charset: UTF-8
+* checking for file ‘FesSelectionCUDA/DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘FesSelectionCUDA’ version ‘1.0’
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘FesSelectionCUDA’ can be installed ... WARNING
+Found the following significant warnings:
+  Warning: bad markup (extra space?) at LRCUDA.Rd:17:13
+  Warning: bad markup (extra space?) at LRCUDA.Rd:20:18
+  Warning: bad markup (extra space?) at LRCUDA.Rd:23:16
+  Warning: bad markup (extra space?) at LRCUDA.Rd:29:14
+See ‘/home/mzp/goku_LRCUDA_Floder/LRCUDA/FesSelectionCUDA.Rcheck/00install.out’ for details.
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking dependencies in R code ... NOTE
+'library' or 'require' calls to packages already attached by Depends:
+  ‘doParallel’ ‘foreach’
+  Please remove these calls from your code.
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+rm.bias: no visible binding for global variable ‘j’
+* checking Rd files ... WARNING
+prepare_Rd: bad markup (extra space?) at LRCUDA.Rd:17:13
+prepare_Rd: bad markup (extra space?) at LRCUDA.Rd:20:18
+prepare_Rd: bad markup (extra space?) at LRCUDA.Rd:23:16
+prepare_Rd: bad markup (extra space?) at LRCUDA.Rd:29:14
+* checking Rd metadata ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... WARNING
+Undocumented code objects:
+  ‘CV’ ‘KFold’ ‘LOOCV’ ‘LRMultipleGPU’ ‘LRSingleGPU’ ‘LRWithFixedVal’
+  ‘LRWithFixedValMG’ ‘RmDupVal’ ‘SemiExh’ ‘cal.f.ratio’ ‘combineResult’
+  ‘cv’ ‘generateIds’ ‘getGPUCount’ ‘getGPUIds’
+All user-level objects in a package should have documentation entries.
+See chapter ‘Writing R documentation files’ in the ‘Writing R
+Extensions’ manual.
+* checking for code/documentation mismatches ... WARNING
+Codoc mismatches from documentation object 'f.ratio':
+f.ratio
+  Code: function(x, y, rank)
+  Docs: function(x, y, k)
+  Argument names in code not in docs:
+    rank
+  Argument names in docs not in code:
+    k
+  Mismatches in argument names:
+    Position: 3 Code: rank Docs: k
+
+Codoc mismatches from documentation object 'rm.bias':
+rm.bias
+  Code: function(result, data, fold, times, count)
+  Docs: function(result, x, y, fold, times, parallel = 1)
+  Argument names in code not in docs:
+    data count
+  Argument names in docs not in code:
+    x y parallel
+  Mismatches in argument names (first 3):
+    Position: 2 Code: data Docs: x
+    Position: 3 Code: fold Docs: y
+    Position: 4 Code: times Docs: fold
+
+* checking Rd \usage sections ... WARNING
+Undocumented arguments in documentation object 'LRCUDA'
+  ‘error.threshhold’
+
+Objects in \usage without \alias in documentation object 'getGPUIds':
+  ‘getGPUIds’
+
+Functions with \usage entries need to have the appropriate \alias
+entries, and all their arguments documented.
+The \usage entries must correspond to syntactically valid R code.
+See chapter ‘Writing R documentation files’ in the ‘Writing R
+Extensions’ manual.
+* checking Rd contents ... WARNING
+Argument items with no description in Rd object 'LRCUDA':
+  ‘y’ ‘n.comb’ ‘fold’ ‘cl’
+
+* checking for unstated dependencies in examples ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking line endings in Makefiles ... OK
+* checking for GNU extensions in Makefiles ... WARNING
+Found the following file(s) containing GNU extensions:
+  src/Makefile
+Portable Makefiles do not use GNU extensions such as +=, :=, $(shell),
+$(wildcard), ifeq ... endif. See section ‘Writing portable packages’ in
+the ‘Writing R Extensions’ manual.
+* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
+* checking compiled code ... NOTE
+Note: information on .o files is not available
+File ‘/home/mzp/goku_LRCUDA_Floder/LRCUDA/FesSelectionCUDA.Rcheck/FesSelectionCUDA/libs/LRCUDA.so’:
+  Found ‘exit’, possibly from ‘exit’ (C)
+  Found ‘printf’, possibly from ‘printf’ (C)
+  Found ‘puts’, possibly from ‘printf’ (C), ‘puts’ (C)
+
+Compiled code should not call entry points which might terminate R nor
+write to stdout/stderr instead of to the console, nor the system RNG.
+The detected symbols are linked into the code but might come from
+libraries and not actually be called.
+
+See ‘Writing portable packages’ in the ‘Writing R Extensions’ manual.
+* checking examples ... OK
+* checking PDF version of manual ... OK
+* DONE
+Status: 7 WARNINGs, 3 NOTEs

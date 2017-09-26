@@ -1,0 +1,15 @@
+Package: FesSelectionCUDA
+Type: Package
+Title: Incremental Feature Selection Algorithm accelerated by GPU
+Version: 1.0
+Date: 2017-09-15
+Depends: R (>= 3.0) ,ROCR, parallel, doParallel, foreach
+SystemRequirements: Nvidia's CUDA toolkit (>= release 5.5)
+Author: Ruiquan Ge, Qinghan Meng, Goku
+Maintainer: goku<jym775096422@gmail.com>
+Description: There is a features selection algorithm to solve gene data which has a "big p small n" feature. Particularly, it selects subset which has both low feature numbers and high accuracies .Logistic regression classification algorithm is used for measuring chosen feature subsets.
+License: GPL
+NeedsCompilation: yes
+Repository: CRAN
+Packaged: 2017-09-26 08:54:16 UTC; mzp
+Built: R 3.2.3; x86_64-pc-linux-gnu; 2017-09-26 08:54:27 UTC; unix

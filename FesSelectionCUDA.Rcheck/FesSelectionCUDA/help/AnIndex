@@ -1,0 +1,6 @@
+FesSelectionCUDA-package	FesSelectionCUDA-package
+f.ratio	f.ratio
+FesSelectionCUDA	FesSelectionCUDA-package
+getGPU	getGPUIds
+LRCUDA	LRCUDA
+rm.bias	rm.bias

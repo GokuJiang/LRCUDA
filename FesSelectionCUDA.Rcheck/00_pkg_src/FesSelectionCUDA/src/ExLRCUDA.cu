@@ -547,10 +547,6 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
         /*
          * add fixed features into the model.
          */
-        //for(int i = 0; i < fixed_features_num_dev; ++ i){
-        //    features[i+1] = fixed_features_dev[i];
-        //}
-       
 
 	for(int i = 0; i < np - 1; i ++){
 		features[i+1] = dev_combn[tid*(np-1) + i];
@@ -566,8 +562,6 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 	float coef[ATTR_NUM];
 	initArrayATTR(coef);
 
-	//float S[ATTR_NUM][ATTR_NUM];
-	//initMatrixATTRATTR(S);
 	float p[INST_NUM];
 	initArrayINST(p);
 
@@ -591,7 +585,8 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 				t += coef[j] * X[train[fold][i]][features[j]];
 
 			}
-			p[i] = 1 / (1 + expf(-t)); //p[i] = 1 / (1 + exp(-t))
+			
+			p[i] = 1 / (1 + expf(-t)); 
 
 		}
 
@@ -601,8 +596,7 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 			for (int k = j; k < np; k++) {
 				float sum = 0;
 				for (int i = 0; i < nind; i++) {
-					sum += X[train[fold][i]][features[j]] * (p[i] * (1 - p[i]))
-							* X[train[fold][i]][features[k]];
+					sum += X[train[fold][i]][features[j]] * (p[i] * (1 - p[i]))	* X[train[fold][i]][features[k]];
 
 				}
 				T[j][k] = T[k][j] = sum;
@@ -610,7 +604,6 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 
 		int flag = 1;
 
-//				initMatrixATTRATTR(T_T);
 		svd_inverse(T, &flag, np);
 
 		if (!flag) {
@@ -625,7 +618,6 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 		for (int i = 0; i < np; i++)
 			for (int j = 0; j < nind; j++)
 				for (int k = 0; k < np; k++) {
-
 					ncoef[i] += (T[i][k] * X[train[fold][j]][features[k]]) * (Y[train[fold][j]] - p[j]);
 				}
 
@@ -1427,12 +1419,6 @@ void InitCrossValidation(float* y , int nind, int fold){
 	int lable_zero_block = lable_zero_num / fold;
 	int lable_zero_left = lable_zero_num % fold;
 
-	if (fold == 1) {
-        	lable_one_block = 0;
-        	lable_one_left  = lable_one_num;
-        	lable_zero_block = 0;
-        	lable_zero_left = lable_zero_num;
-    	}
 	int** train = (int**)malloc(sizeof(int*)*fold);
 	for(int i = 0; i < fold; i ++){
 		train[i] = (int*)malloc(sizeof(int)*nind);
@@ -1556,13 +1542,12 @@ void InitDeviceData() {
 	float** dev_x_h = (float**) malloc(sizeof(float*) * nind);
 	for (int i = 0; i < nind; ++i) {
 		cudaMalloc((void**) &dev_x_h[i], np * sizeof(float));
-		//printf("%d:%lx\n",i,dev_x_h[i]);
-		cudaMemcpy(dev_x_h[i], matrix[i], sizeof(float) * np,
-				cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_x_h[i], matrix[i], sizeof(float) * np, cudaMemcpyHostToDevice);
 	}
 	float** dev_x;
 	cudaMalloc((void**) &dev_x, nind * sizeof(float*));
 	cudaMemcpy(dev_x, dev_x_h, sizeof(float*) * nind, cudaMemcpyHostToDevice);
+	
 	/*
 	 * alloc Y memory in device.
 	 */
@@ -1789,8 +1774,9 @@ SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP error_threshhold, SEXP fold, SEX
 
     InitGridBlock(65535,64);
     n_comb = *INTEGER(num_comb);
-    SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
-    SEXP result = TransferResultToR();
+	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
+
+	SEXP result = TransferResultToR();
 	return result;
 
 
