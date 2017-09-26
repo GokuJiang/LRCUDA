@@ -34,16 +34,5 @@ LRCUDA(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id = 0, cl = N
 \item{result}{The result of feature selection . Each row in result represent the one combination of selected features and its log loss.}
 }
 
-
-\examples{
-data(colon)
-x <- colon$x
-y <- colon$y
-x <- f.ratio(x, y, 2000)
-gpu.ids <- getGPUIds()
-result <- LRCUDA(x = x, y = y, device.id = gpu.ids)
-
-}
-
 \keyword{ LRCUDA }% use one of  RShowDoc("KEYWORDS")
 
