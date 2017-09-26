@@ -22,15 +22,7 @@ f.ratio(x, y, k)
 {}{A vector containing selected feature index.}
 }
 
-\examples{
 
-data(colon)
-x <- colon$x
-y <- colon$y
-k <- 10
-rank.k <- f.ratio(x, y, k)
-print(rank.k)
 
-}
 \keyword{ ratio }
 

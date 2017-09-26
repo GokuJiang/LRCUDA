@@ -26,14 +26,5 @@ rm.bias(result, x, y, fold, times, parallel = 1)
 A data frame containing the average acc and auc for selected features by multiple cross validation.
 }
 
-\examples{
-data(colon)
-x <- colon$x
-y <- colon$y
-x <- f.ratio(x, y, 1000)
-gpu.ids <- getGPUIds()
-p.result <- iFes(x = x, y = y, device.id = gpu.ids)
-}
-
 
 \keyword{ bias }
