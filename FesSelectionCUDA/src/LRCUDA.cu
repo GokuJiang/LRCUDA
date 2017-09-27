@@ -576,7 +576,7 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 	// Newton-Raphson to fit logistic model
 
 	int converge = 0;
-	int it = 0;   //  迭代的次数
+	int it = 0;   //  ???????????????
 
 	float T[ATTR_NUM][ATTR_NUM];
 
@@ -584,9 +584,9 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 
 	while (!converge && it < 20) {
 
-		for (int i = 0; i < nind; i++) { //nind 训练集的个数
+		for (int i = 0; i < nind; i++) { //nind ??????????????????
 			float t = 0;
-			for (int j = 0; j < np; j++) {  //np 变量个数
+			for (int j = 0; j < np; j++) {  //np ????????????
 
 				t += coef[j] * X[train[fold][i]][features[j]];
 
@@ -1529,7 +1529,7 @@ void InitDeviceData() {
 	int nind = data_file.nrow;
 	int np = data_file.ncol - 1;
 
-	int i, j, k;
+	int i;
 
 	/*
 	 * alloc Y memory
