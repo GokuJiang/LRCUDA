@@ -1,5 +1,5 @@
 \name{KFold}
-\alias{K-Fold}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 K-Fold Cross Vialidation

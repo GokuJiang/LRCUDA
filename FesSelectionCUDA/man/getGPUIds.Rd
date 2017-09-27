@@ -1,5 +1,5 @@
 \name{getGPUIds}
-\alias{getGPU}
+
 \title{
 Get GPU device IDs from localhost or a cluster.
 }

@@ -1,5 +1,4 @@
 \name{LRCUDA}
-\alias{Logidstic Reg CUDA}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 An incremental feature selection algorithm for gene expression profile. We implement it using logistic regression which is accelerated by NVIDIA GPU technology.}

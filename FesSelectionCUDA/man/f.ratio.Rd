@@ -1,5 +1,5 @@
 \name{f.ratio}
-\alias{f.ratio}
+
 \title{
 Screen features by fisher's ratio(statistic).
 }

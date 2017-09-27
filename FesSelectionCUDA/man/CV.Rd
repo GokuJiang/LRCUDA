@@ -1,5 +1,4 @@
 \name{cv}
-\alias{CV}
 
 \title{
 Cross Vaildiation

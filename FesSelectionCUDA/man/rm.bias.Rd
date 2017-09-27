@@ -1,5 +1,5 @@
 \name{rm.bias}
-\alias{rm.bias}
+
 \title{
 Remove the bias of selected features by iFes.
 }
