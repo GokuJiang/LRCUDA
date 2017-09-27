@@ -6,7 +6,9 @@ cv <- function(y, fold){
   lables <- unique(y)
   groups <- list()
   for(lable in lables){
-    group[[as.character(lable)]] <- which(y == lable)
+    groups[[as.character(lable)]] <- which(y == lable)
   }
-  
+
 }
+
+
