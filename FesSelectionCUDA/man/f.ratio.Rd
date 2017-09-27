@@ -7,7 +7,7 @@ Screen features by fisher's ratio(statistic).
 Fisher's ratio is a measure for discriminating power of some variable. We use it to detect useless features.
 }
 \usage{
-f.ratio(x, y, k)
+f.ratio(x, y, rank)
 }
 %- maybe also 'usage' for other objects documented here.
 

@@ -9,12 +9,12 @@ Cross Vaildiation
 }
 
 \usage{
-cv(y,fload)
+cv(y,fold)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{y}{ The label vector, positive(1) or negative(0)}
-  \item{flod}{The number of fold of cross validation used in the program.}
+  \item{fold}{The number of fold of cross validation used in the program.}
 }
 
 \examples{
