@@ -15,11 +15,11 @@ f.ratio(x, y, rank)
 \arguments{
 \item{x}{Gene expression profile matrix. The columns represent different prob sets. The rows represent different samples. The values in the matrix represent gene expression levels.}
 \item{y}{The response vector, positive(1) or negative(0).}
-\item{k}{Top k features are returned which are mostly correlated with response(y).}
+\item{rank}{Top k features are returned which are mostly correlated with response(y).}
 }
 
 \value{
-{}{A vector containing selected feature index.}
+\item{}{A vector containing selected feature index.}
 }
 
 
