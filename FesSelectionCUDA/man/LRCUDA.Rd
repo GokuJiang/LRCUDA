@@ -14,19 +14,19 @@ LRCUDA(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id = 0, cl = N
   \item{x}{
     Gene expression profile matrix. The columns represent different prob sets. The rows represent different samples. The values in the matrix represent gene expression levels.
     }
-    \item{y} {
+  \item{y} {
     The label vector, positive(1) or negative(0)
     }
-    \item{n.comb} {
+  \item{n.comb} {
     The number of features which are selected.
     }
-    \item{fold} {
+  \item{fold} {
     The number of fold of cross validation used in the program.
     }
-    \item{device.id}{
+  \item{device.id}{
     The GPU device ID. 
     }
-    \item{cl} {
+  \item{cl} {
     The cluster of computers which you created. If it is NULL, the program will create clusters based on the number of devices automatically.
     }
 }

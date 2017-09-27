@@ -2,8 +2,12 @@
 # the R header dir, and the R shared library dir on your system
 R_HOME := $(shell R RHOME)
 R_INC := /usr/share/R/include
+#R_INC := $(R_HOME)/include
 R_LIB := $(R_HOME)/lib
 R_INCLUDE := /usr/share/R/include
+#R_INCLUDE := $(R_HOME)/include
+
+
 # replace these three lines with
 # CUDA_HOME := <path to your cuda install>
 ifndef CUDA_HOME
