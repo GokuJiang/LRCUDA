@@ -16,6 +16,4 @@ combineResult <- function(result){
     
 }
 
-#rec <- list(name="李明", age=30, scores=c(85, 76, 90)) 
-#combineResult(rec)
 

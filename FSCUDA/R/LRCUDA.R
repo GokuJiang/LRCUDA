@@ -23,7 +23,6 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
         }
     }
     
-    ###待处理
     clusterEvalQ(cl,library("LRCUDA"))
 
 
