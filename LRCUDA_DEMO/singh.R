@@ -1,0 +1,8 @@
+library(LRCUDA)
+library(snow)
+load("~/workspace/LRCUDA/data/singh.RData")
+singh <- as.matrix(singh)
+result <- LRCUDA(singh[,1:(ncol(singh)-1)], singh[,ncol(singh)], n.comb = 1, error.threshhold = 200, device.id = 0)
+save(result, file = "singh.one.RData")
+result <- LRCUDA(singh[,1:(ncol(singh)-1)], singh[,ncol(singh)], error.threshhold = 10, device.id = c(0,1,2,3))
+save(result, file = "singh.two.RData")
