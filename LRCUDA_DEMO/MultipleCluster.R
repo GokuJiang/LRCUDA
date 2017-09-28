@@ -29,7 +29,7 @@ for (fold in inTraining) {
     x <- matrix(as.numeric(dataSet[2:shape[1],2:shape[2]]),ncol = colon.n - 1,byrow = TRUE)
     y <- mat[2:row.n,1]
     y <- unlist(lapply(y,function(i) binaryzation(i)))
-    result <- SemiExh(x, y,n.comb = 5, error.threshhold = 40, device.id = gpu.ids, cl =1)
+    result <- SemiExh(x, y,n.comb = 5, error.threshhold = 40, device.id = gpu.ids, cl =NULL)
     print(result)
     i <- i+1  
 }
