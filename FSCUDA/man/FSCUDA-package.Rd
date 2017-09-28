@@ -1,5 +1,5 @@
-\name{FesSelectionCUDA-package}
-\alias{FesSelectionCUDA-package}
+\name{FSCUDA-package}
+\alias{FSCUDA}
 \alias{FesSelectionCUDA}
 \docType{package}
 \title{
@@ -10,7 +10,7 @@ There is a features selection algorithm to solve gene data which has a "big p sm
 }
 \details{
 \tabular{ll}{
-Package: \tab FesSelectionCUDA\cr
+Package: \tab FSCUDA\cr
 Type: \tab Package\cr
 Version: \tab 0.1\cr
 Date: \tab 2017-09-25\cr
