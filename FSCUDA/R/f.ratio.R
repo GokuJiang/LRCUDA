@@ -1,5 +1,3 @@
-
-
 cal.f.ratio <- function(feature, x, y){
   u.1 <- mean(x[y == 1, feature])
   v.1 <- var(x[y == 1, feature])

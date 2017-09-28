@@ -1448,19 +1448,23 @@ void InitCrossValidation(float* y , int nind, int fold){
 		test_num[i] = 0;
 		for(int j = lable_one_block*i; j < lable_one_block*(i+1); j ++){
 			test[i][test_num[i]] = lable_one[j];
+			printf("test[%d][%d]=%d",i,test_num[i],test[i][test_num[i]]);
 			test_num[i]++;
 		}
 		if(i < lable_one_left){
 			test[i][test_num[i]] = lable_one[fold*lable_one_block+i];
+			printf("test[%d][%d]=%d",i,test_num[i],test[i][test_num[i]]);
 			test_num[i]++;
 		}
 
 		for (int j = lable_zero_block * i; j < lable_zero_block * (i + 1); j++) {
 			test[i][test_num[i]] = lable_zero[j];
+		printf("test[%d][%d]=%d",i,test_num[i],test[i][test_num[i]]);
 			test_num[i]++;
 		}
 		if (i < lable_zero_left) {
 			test[i][test_num[i]] = lable_zero[fold * lable_zero_block + i];
+printf("test[%d][%d]=%d",i,test_num[i],test[i][test_num[i]]);
 			test_num[i]++;
 		}
 
@@ -1471,6 +1475,7 @@ void InitCrossValidation(float* y , int nind, int fold){
 				continue;
 			}else{
 				train[i][train_num[i]] = lable_one[j];
+				printf("test[%d][%d]=%d",i,test_num[i],test[i][test_num[i]]);	
 				train_num[i]++;
 			}
 		}
@@ -1479,6 +1484,7 @@ void InitCrossValidation(float* y , int nind, int fold){
 				continue;
 			}else{
 				train[i][train_num[i]] = lable_zero[j];
+				printf("test[%d][%d]=%d",i,test_num[i],test[i][test_num[i]]);
 				train_num[i]++;
 			}
 		}

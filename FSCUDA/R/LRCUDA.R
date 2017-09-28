@@ -13,8 +13,7 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     device.num <- length(device.id)
     
  
-    if(is.null(cl)){
-        
+    if(is.null(cl)){        
         cl <- makeCluster(length(device.id), type = "SOCK")
         
     }else{
@@ -22,11 +21,9 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
             stop("device count should be equal to cluster size! Please check you configures.")
         }
     }
-    
-    clusterEvalQ(cl,library("LRCUDA"))
+    clusterEvalQ(cl,library("FSCUDA"))
 
-
-   para <- vector("list", device.num)
+    para <- vector("list", device.num)
     task.piece <- floor(task.num / device.num)	
 
     for(i in 1:device.num){
@@ -35,9 +32,11 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     if(para[[device.num]]$stop < task.num){
             para[[device.num]]$stop = task.num
     }
-               
-    result <- clusterApply(cl, para, LRMultipleGPU)
-    return(combineResult(result))
+    print(33333)           
+    print(cl)
+    #result <- clusterApply(cl, para, LRMultipleGPU)
+    print(44444)
+    #return(combineResult(result))
 }
 
 

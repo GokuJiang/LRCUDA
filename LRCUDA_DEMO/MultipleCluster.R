@@ -1,9 +1,8 @@
-library("FSCUDA")
 library("caret")
 library("snow")
+library("stringr")
 load("Colon.Rdata")
-
-
+library("FSCUDA")
 
 binaryzation <- function(str) {
     
@@ -18,18 +17,20 @@ binaryzation <- function(str) {
 }
 
 mat <- matrix(unlist(data), ncol=2001, byrow=TRUE)
-y <- mat[2:63,1]
-y <- unlist(lapply(y, function(i) binaryzation(i)))
-x = matrix(as.numeric(mat[2:63,2:2001]),ncol=2000,byrow=TRUE)
+inTraining <- createFolds(mat[2:63,1], 5, TRUE)
+gpu.ids = getGPUIds() 
 
-
-
-#result <- LRCUDA(x,y,error.threshhold = 62,n.comb =3, device.id = c(0,1,2,3,0,1,2,3,0,1,2,3))
-
-#result <- SemiExh(x, y,n.comb = 6, error.threshhold = 40, device.id = c(0,1,2,3,0,1,2,3,0,1,2,3), cl = NULL)
-
-#save(result, file = "MultipleClusterResult.RData")
-
-#print(result)
-
+i <- 0
+for (fold in inTraining) {
+    dataSet <- mat[fold,]
+    shape <- dim(dataSet)
+    row.n <- shape[1]
+    colon.n <- shape[2]
+    x <- matrix(as.numeric(dataSet[2:shape[1],2:shape[2]]),ncol = colon.n - 1,byrow = TRUE)
+    y <- mat[2:row.n,1]
+    y <- unlist(lapply(y,function(i) binaryzation(i)))
+    result <- SemiExh(x, y,n.comb = 5, error.threshhold = 40, device.id = gpu.ids, cl =1)
+    print(result)
+    i <- i+1  
+}
 
