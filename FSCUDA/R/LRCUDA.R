@@ -14,18 +14,18 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     
  
     if(is.null(cl)){        
-        cl <- makeCluster(length(device.id), type = "SOCK")
+        #outfile = c("~/goku_LRCUDA_Floder/log1.log","~/goku_LRCUDA_Floder/log2.log","~/goku_LRCUDA_Floder/log3.log","~/goku_LRCUDA_Floder/log4.log")
+	cl <- makeCluster(length(device.id), type = "SOCK")
         
     }else{
         if(length(cl) != length(device.id)){
             stop("device count should be equal to cluster size! Please check you configures.")
         }
     }
+    registerDoParallel(cl)
     clusterEvalQ(cl,library("FSCUDA"))
-
     para <- vector("list", device.num)
     task.piece <- floor(task.num / device.num)	
-
     for(i in 1:device.num){
         para[[i]] <- list(x = x, y = y, n.comb = n.comb, error.threshhold = error.threshhold, fold = fold, device.id = device.id[i], start = (i-1)*task.piece + 1, stop = i*task.piece)
     }

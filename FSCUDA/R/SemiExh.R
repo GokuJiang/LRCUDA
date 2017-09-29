@@ -121,7 +121,7 @@ SemiExh <- function(x, y,n.comb =  3 ,error.threshhold = 0, fold = 1, device.id 
     fixed.features <- result.one[,1]
     #rand.index <- sample(1:length(y), length(y))    
     result.two <- LRWithFixedValMG(x, y, n.comb = n.comb, error.threshhold = error.min.one, fold = fold, device.id = device.id , cl = cl, fixed.features = as.matrix(fixed.features))
-    
+    print(111.2222)    
     if(nrow(result.two) == 0){
         print("use two features can't satisfy the error theshhold")
         return(result.l)
