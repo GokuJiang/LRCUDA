@@ -1,3 +1,24 @@
+#cv <- function(y, fold){
+#  lables <- unique(y)
+#  groups <- list()
+#  for(lable in lables){
+#    groups[[as.character(lable)]] <- which(y == lable)
+#  }
+#}
+
+
+
+#' loo cross valiation
+
+#' @param features The number of features
+#' @param X Gene expression profile matrix. The columns represent different prob sets. The rows represent different samples. The values in the matrix represent gene expression levels.
+#' @param Y The label vector, positive(1) or negative(0)
+#' @examples
+#' X = matrix(1:12, 4, 3)
+#' Y = c(1,0,1,1)
+#' result <- LOOCV(3,X,Y)
+#' print(result)
+#' @export
 LOOCV <- function(features, X, Y){
   X <- X[,features]
   data <- as.data.frame(cbind(X,Y))
@@ -12,7 +33,14 @@ LOOCV <- function(features, X, Y){
   return(error / length(Y))
 }
 
+#' k flod cross valiation
 
+#' @param y The label vector, positive(1) or negative(0)
+#' @param fold The number of fold of cross validation used in the program.
+#' @examples
+#' result <- CV(c(1,0,1,1,1,1,1,1,0,0,0,1,0,0,0,1,0),4)
+#' print(result)
+#' @export
 CV <- function(y, fold = 10){
   zero.index <- which(y == 0)
   zero.index <- sample(zero.index, length(zero.index))
@@ -63,8 +91,6 @@ KFold <- function(features, X, Y, fold, n){
 
 
 rm.bias <- function(result, data, fold, times, count){
-  require(foreach)
-  require(doParallel)
   
   cl <- makeCluster(count , type = "SOCK")
   registerDoParallel(cl)

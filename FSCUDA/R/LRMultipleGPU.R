@@ -1,3 +1,9 @@
+
+#'Run LRCUDA with multiple GPU
+
+#' @param para paramters with LRCUDA
+#' @export
+
 LRMultipleGPU <- function(para){
      x <- para$x
      y <- para$y
@@ -7,9 +13,7 @@ LRMultipleGPU <- function(para){
      device.id <- para$device.id
      start <- para$start
      stop <- para$stop
-     print(66666)
      result <- .Call("LRCUDA", t(x), y, as.integer(n.comb), as.integer(error.threshhold), as.integer(fold), as.integer(device.id), as.integer(start), as.integer(stop))
-     print(77777777)
      print(result)
      return(t(matrix(result, nrow = n.comb + 1)))
      

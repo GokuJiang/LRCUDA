@@ -1,8 +1,11 @@
 library("caret")
 library("snow")
 library("stringr")
-load("Colon.Rdata")
+
 library("FSCUDA")
+
+
+
 
 binaryzation <- function(str) {
     
@@ -16,25 +19,28 @@ binaryzation <- function(str) {
     return (flag)
 }
 
-mat <- matrix(unlist(data), ncol=2001, byrow=TRUE)
-inTraining <- createFolds(mat[2:63,1], 5, TRUE)
-gpu.ids <- getGPUIds() 
-print(typeof(gpu.ids))
-print(gpu.ids[[1]][1])
 
-i <- 0
-for (fold in inTraining) {
-   if (i == 0) {
-	 dataSet <- mat[fold,]
-    shape <- dim(dataSet)
-    row.n <- shape[1]
-    colon.n <- shape[2]
-    x <- matrix(as.numeric(dataSet[2:shape[1],2:shape[2]]),ncol = colon.n - 1,byrow = TRUE)
-    y <- mat[2:row.n,1]
-    y <- unlist(lapply(y,function(i) binaryzation(i)))
-    result <- SemiExh(x, y,n.comb = 5, error.threshhold = 40, device.id = gpu.ids[[1]], cl =NULL)
-    print(result)
-    }
-    i <- i+1  
-}
+colon<-read.table('Colon.csv',sep=",",as.is=FALSE)
+
+
+shape <- dim(colon)
+
+row.n <- shape[1]
+colon.n <- shape[2]
+
+gpu.ids <- getGPUIds() 
+
+x <- colon[2:row.n,2:colon.n]
+
+
+x <- matrix(as.numeric(unlist(x)),ncol = row.n-1,byrow=TRUE)
+
+
+y <- colon[1:1,2:colon.n]
+
+y <- unlist(lapply(y,function(i) binaryzation(i))) 
+
+
+print(gpu.ids[[1]])
+result <- SemiExh(x, y,n.comb = 4, error.threshhold = 40, device.id = 0, cl =NULL)
 

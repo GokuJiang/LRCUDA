@@ -3,6 +3,7 @@
 ################################################################################
 
 #remove duplicated feature sets.
+dyn.load('src/LRCUDA.o')
 RmDupVal <- function(features){
     features <- t(apply(features, 1, sort))
     features <- subset(features, duplicated(features) == F)
@@ -99,12 +100,10 @@ SemiExh <- function(x, y,n.comb =  3 ,error.threshhold = 0, fold = 1, device.id 
     result.l <- list()
    # rand.index <- sample(1:length(y), length(y))
     result.one <- LRCUDA(x = x, y = y, n.comb = n.comb, error.threshhold = length(y) / 2, fold = fold, device.id = device.id, cl = cl)
-    print(11111) 
     if(nrow(result.one) == 0){
          print("use one feature can't statisfy the error threshhold")
          return(result.l)
     }
-    print(2222)
     result.l[[1]] <- result.one
     error.min.one <- min(result.one$error)
     print(paste("error.min.one", error.min.one))
@@ -165,4 +164,3 @@ SemiExh <- function(x, y,n.comb =  3 ,error.threshhold = 0, fold = 1, device.id 
     return(result.l) 
 }
 
-#LRWithFixedValMG()

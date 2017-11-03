@@ -1,6 +1,12 @@
 #combine analysis result from cluster.
 #store the result as data frame type.
 
+
+dyn.load("src/LRCUDA.o")
+#' Result
+#' @param result result of LRCUDA
+#' @export
+
 combineResult <- function(result){
     
     #result is a list
