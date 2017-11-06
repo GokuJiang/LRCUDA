@@ -34,7 +34,10 @@ x <- matrix(as.numeric(unlist(x)),ncol = row.n,byrow=TRUE)
 
 y <- colon[1:1,2:column.n]
 
+
 y <- lapply(y,function(i) binaryzation(i))
+
+y <- as.numeric(y)
 
 #y <- list(unlist(y),ncol = 1,byrow=TRUE)
 
