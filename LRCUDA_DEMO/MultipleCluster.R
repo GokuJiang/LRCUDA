@@ -35,7 +35,7 @@ y <- colon[1:1,2:column.n]
 
 y <- lapply(y,function(i) binaryzation(i))
 
-y <- matrix(unlist(y),ncol = 1,byrow=TRUE)
+y <- list(unlist(y),ncol = n.column.n-1,byrow=TRUE)
 
 write.csv(x, 'Colon_X.csv')
 write.csv(y, 'Colon_y.csv')
