@@ -16,7 +16,7 @@ binaryzation <- function(str) {
 }
 
 
-colon<-read.csv('Colon.csv')
+colon<-read.csv('Colon.csv',header=TRUE)
 
 shape <- dim(colon)
 
@@ -27,7 +27,7 @@ gpu.ids <- getGPUIds()
 print(row.n)
 print(column.n)
 
-x <- colon[2:row.n,2:column.n]
+x <- colon[1:row.n,2:column.n]
 print(dim(x))
 
 x <- matrix(as.numeric(unlist(x)),ncol = row.n,byrow=TRUE)
