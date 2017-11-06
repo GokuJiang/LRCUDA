@@ -3,9 +3,6 @@ library("snow")
 library("stringr")
 library("FSCUDA")
 
-
-
-
 binaryzation <- function(str) {
 
     flag <- 0
@@ -32,9 +29,11 @@ x <- colon[2:row.n,2:colon.n]
 print(dim(x))
 x <- matrix(as.numeric(unlist(x)),ncol = row.n-1,byrow=TRUE)
 
-y <- colon[1:1,2:colon.n]
-print(y[1])
-y <- unlist(lapply(y,function(i) binaryzation(i)))
-#print(gpu.ids[[1]])
-#result <- SemiExh(x, y,n.comb = 3, error.threshhold = 100, device.id = 0, cl =NULL)
-#print(result)
+y <- colon[1,2:colon.n]
+y <- lapply(y,function(i) binaryzation(i))
+y <- matrix(as.numeric(unlist(y)),ncol = 1,byrow=TRUE)
+write.csv(x, 'Colon_X.csv')
+write.csv(y, 'Colon_y.csv')
+
+result <- SemiExh(x, y,n.comb = 3, error.threshhold = 50, device.id = gpu.ids, cl =NULL)
+print(result)
