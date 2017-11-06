@@ -26,7 +26,8 @@ column.n <- shape[2]
 gpu.ids <- getGPUIds()
 print(row.n)
 print(column.n)
-print(colon[3,2])
+print(colon[1])
+print(colon[0])
 
 x <- colon[2:column.n,2:row.n]
 print(dim(x))
