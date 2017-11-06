@@ -24,10 +24,10 @@ row.n <- shape[1]
 colon.n <- shape[2]
 
 gpu.ids <- getGPUIds()
-
-x <- colon[2:row.n,2:colon.n]
+print(shape)
+x <- colon[1:row.n,2:colon.n]
 print(dim(x))
-x <- matrix(as.numeric(unlist(x)),ncol = row.n-1,byrow=TRUE)
+x <- matrix(as.numeric(unlist(x)),ncol = row.n,byrow=TRUE)
 
 y <- colon[1,2:colon.n]
 y <- lapply(y,function(i) binaryzation(i))
