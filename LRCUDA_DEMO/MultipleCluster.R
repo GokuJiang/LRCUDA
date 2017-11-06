@@ -20,8 +20,8 @@ colon<-read.csv('Colon.csv')
 
 shape <- dim(colon)
 
-row.n <- shape[1] //2000
-column.n <- shape[2] //62
+row.n <- shape[1] #2000
+column.n <- shape[2] #62
 
 gpu.ids <- getGPUIds()
 print(row.n)
