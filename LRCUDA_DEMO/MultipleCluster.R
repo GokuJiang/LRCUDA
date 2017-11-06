@@ -24,7 +24,8 @@ row.n <- shape[1]
 column.n <- shape[2]
 
 gpu.ids <- getGPUIds()
-print(shape)
+print(row.n)
+print(column.n)
 print(colon[3,2])
 
 x <- colon[2:column.n,2:row.n]
