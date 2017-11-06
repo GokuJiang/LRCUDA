@@ -25,9 +25,11 @@ column.n <- shape[2]
 
 gpu.ids <- getGPUIds()
 print(shape)
-print(colon[1])
-x <- colon[1:row.n,2:column.n]
+print(colon[2,2])
+
+x <- colon[2:column.n,2:row.n]
 print(dim(x))
+
 x <- matrix(as.numeric(unlist(x)),ncol = row.n,byrow=TRUE)
 
 y <- colon[1,2:colon.n]
