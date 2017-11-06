@@ -39,6 +39,9 @@ y <- lapply(y,function(i) binaryzation(i))
 
 y <- as.numeric(y)
 
+print(typeof(y))
+print(y)
+
 #y <- list(unlist(y),ncol = 1,byrow=TRUE)
 
 write.csv(x, 'Colon_X.csv')
