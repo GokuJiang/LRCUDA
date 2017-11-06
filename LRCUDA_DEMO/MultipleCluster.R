@@ -42,7 +42,7 @@ write.csv(x, 'Colon_X.csv')
 write.csv(y, 'Colon_y.csv')
 
 print(dim(x))
-print(dim(y))
+print(length(y))
 
 result <- SemiExh(x, y,n.comb = 3, error.threshhold = 50, device.id = gpu.ids, cl=NULL)
 print(result)
