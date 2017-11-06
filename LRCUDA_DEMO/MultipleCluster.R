@@ -27,7 +27,7 @@ gpu.ids <- getGPUIds()
 print(row.n)
 print(column.n)
 
-x <- colon[2:column.n,2:row.n]
+x <- colon[2:row.n,2:column.n]
 print(dim(x))
 
 x <- matrix(as.numeric(unlist(x)),ncol = row.n,byrow=TRUE)
