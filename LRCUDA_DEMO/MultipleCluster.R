@@ -21,11 +21,12 @@ colon<-read.csv('Colon.csv')
 shape <- dim(colon)
 
 row.n <- shape[1]
-colon.n <- shape[2]
+column.n <- shape[2]
 
 gpu.ids <- getGPUIds()
 print(shape)
-x <- colon[1:row.n,2:colon.n]
+print(colon[1])
+x <- colon[1:row.n,2:column.n]
 print(dim(x))
 x <- matrix(as.numeric(unlist(x)),ncol = row.n,byrow=TRUE)
 
