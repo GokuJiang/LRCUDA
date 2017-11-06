@@ -3,7 +3,6 @@
 ################################################################################
 
 #remove duplicated feature sets.
-dyn.load('src/LRCUDA.o')
 RmDupVal <- function(features){
     features <- t(apply(features, 1, sort))
     features <- subset(features, duplicated(features) == F)

@@ -1,4 +1,3 @@
-dyn.load("src/LRCUDA.o")
 
 #' run LRCUDA with single GPU
 

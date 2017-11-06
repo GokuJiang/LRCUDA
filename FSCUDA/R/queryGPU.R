@@ -1,5 +1,3 @@
-dyn.load("src/LRCUDA.so")
-
 #' get GPU count
 
 #' @param cl The cluster of computers which you created. If it is NULL, the program will create clusters based on the number of devices automatically.

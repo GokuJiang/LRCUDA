@@ -1,4 +1,3 @@
-
 #'Run LRCUDA with multiple GPU
 
 #' @param para paramters with LRCUDA
