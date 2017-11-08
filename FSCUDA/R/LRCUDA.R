@@ -11,24 +11,20 @@
 #' @param cl The cluster of computers which you created. If it is NULL, the program will create clusters based on the number of devices automatically.
 #' @export
 LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id = 0, cl = NULL){
-    print("L1")
     if(!is.matrix(x)){
         stop("x should be matrix type !")
     }
 
-    print("L2")
 
     if(nrow(x) != length(y)){
         stop("x'rows is different from y'length !")
     }
 
-    print("L3")
 
     task.num <- choose(ncol(x), n.comb)
     x <- cbind(rep(1,length(y)), x)
     device.num <- length(device.id)
 
-    print("L4")
 
     if(is.null(cl)){
         cl <- makeCluster(length(device.id), type = "SOCK")
@@ -39,10 +35,13 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
         }
     }
 
+    print('L5')
     registerDoParallel(cl)
+    print('L6')
     clusterEvalQ(cl,library("FSCUDA"))
+    print('L7')
+
     para <- vector("list", device.num)
-    print(para)
     task.piece <- floor(task.num / device.num)
 
     for(i in 1:device.num){
@@ -52,6 +51,8 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     if(para[[device.num]]$stop < task.num){
             para[[device.num]]$stop = task.num
     }
+    print(para)
+
     result <- clusterApply(cl, para, LRMultipleGPU)
     
     #result <- clusterApply(cl, para, LRSingleGPU)
