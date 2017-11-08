@@ -32,10 +32,5 @@ y <- colon[1,2:column.n]
 y <- lapply(y,function(i) binaryzation(i))
 y <- as.integer(unlist(y))
 
-print(typeof(x))
-print(typeof(y))
-print(typeof(gpu.ids[1]))
-#print(typeof(gpu.ids[[1]])
-
-result <- SemiExh(x, y,n.comb = 3, error.threshhold = 50, device.id = 0, cl=NULL)
+result <- SemiExh(x, y,n.comb = 4, error.threshhold = 50, device.id = 0, cl=NULL)
 print(result)
