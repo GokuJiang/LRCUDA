@@ -11,6 +11,7 @@
 #' @param cl The cluster of computers which you created. If it is NULL, the program will create clusters based on the number of devices automatically.
 #' @export
 LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id = 0, cl = NULL){
+    print(1111111)
     if(!is.matrix(x)){
         stop("x should be matrix type !")
     }
