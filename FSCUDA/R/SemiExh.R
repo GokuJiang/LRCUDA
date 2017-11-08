@@ -58,7 +58,7 @@ LRWithFixedValMG <- function(x, y, n.comb = 1, error.threshhold = 0 , fold = 10,
     }
     device.num <- length(device.id)
 
-    clusterEvalQ(cl,library(LRCUDA))
+    clusterEvalQ(cl,library(FSCUDA))
     para <- vector("list", device.num)
     task.piece <- floor(task.num / device.num)
    
@@ -99,6 +99,7 @@ SemiExh <- function(x, y,n.comb =  3 ,error.threshhold = 0, fold = 1, device.id 
     result.l <- list()
    # rand.index <- sample(1:length(y), length(y))
     result.one <- LRCUDA(x = x, y = y, n.comb = n.comb, error.threshhold = length(y) / 2, fold = fold, device.id = device.id, cl = cl)
+    print(result.one)
     if(nrow(result.one) == 0){
          print("use one feature can't statisfy the error threshhold")
          return(result.l)

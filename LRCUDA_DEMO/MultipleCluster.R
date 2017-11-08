@@ -7,7 +7,7 @@ binaryzation <- function(str) {
 
     flag <- 0
 
-    if (str == "TumorTissue") {
+    if (str == "Tumor tissue") {
         flag <- 1
     }else {
         flag <- 0
@@ -16,7 +16,7 @@ binaryzation <- function(str) {
 }
 
 
-colon<-read.csv('Colon.csv',header=TRUE)
+colon<-read.csv('Colon.csv',header=FALSE)
 
 shape <- dim(colon)
 
@@ -32,12 +32,12 @@ x <- colon[1:row.n,2:column.n]
 
 x <- matrix(as.numeric(unlist(x)),ncol = row.n,byrow=TRUE)
 
-y <- colon[1:1,2:column.n]
+y <- colon[1,2:column.n]
 
 
 y <- lapply(y,function(i) binaryzation(i))
 
-y <- as.numeric(y)
+y <- as.integer(unlist(y))
 
 print(typeof(y))
 print(y)
@@ -47,8 +47,6 @@ print(y)
 write.csv(x, 'Colon_X.csv')
 write.csv(y, 'Colon_y.csv')
 
-print(dim(x))
-print(length(y))
 
 result <- SemiExh(x, y,n.comb = 3, error.threshhold = 50, device.id = gpu.ids, cl=NULL)
 print(result)
