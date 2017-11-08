@@ -51,7 +51,6 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     if(para[[device.num]]$stop < task.num){
             para[[device.num]]$stop = task.num
     }
-    print(para)
 
     result <- clusterApply(cl, para, LRMultipleGPU)
     
