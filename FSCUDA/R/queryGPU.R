@@ -10,7 +10,7 @@ getGPUCount <- function(cl = NULL){
 	count[[1]] <- .Call("getGPUCount")
         return(count)
     }else{
-        clusterEvalQ(cl, library(FSCUDA))
+        clusterEvalQ(cl, library('FSCUDA'))
     	count <- clusterEvalQ(cl, .Call("getGPUCount"))
         return(count)
     }
