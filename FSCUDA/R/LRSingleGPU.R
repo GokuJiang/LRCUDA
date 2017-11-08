@@ -10,8 +10,15 @@
 #' @param start   
 #' @param stop 
 #' @export
-LRSingleGPU <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id = 0, start, stop){
-
+LRSingleGPU <- function(para){
+     x <- para$x
+     y <- para$y
+     n.comb <- para$n.comb
+     error.threshhold <- para$error.threshhold
+     fold <- para$fold
+     device.id <- para$device.id
+     start <- para$start
+     stop <- para$stop    
     result <- .Call("LRCUDA", t(x), y, as.integer(n.comb), as.integer(error.threshhold), as.integer(fold), as.integer(device.id), as.integer(start), as.integer(stop))
     return(matrix(result, ncol = n.comb + 1))
 }
