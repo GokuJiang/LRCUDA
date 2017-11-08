@@ -38,7 +38,7 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     print('L5')
     registerDoParallel(cl)
     print('L6')
-    clusterEvalQ(cl,library("FSCUDA"))
+    clusterEvalQ(cl,library(FSCUDA))
     print('L7')
 
     para <- vector("list", device.num)
