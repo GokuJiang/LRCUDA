@@ -17,7 +17,6 @@ LRSingleGPU <- function(para){
     error.threshhold <- as.integer(para$error.threshhold)
     fold <- as.integer(para$fold)
     device.id <- as.integer(para$device.id)
-    print(55555)
     start <- as.integer(para$start)
     stop <- as.integer(para$start)
   

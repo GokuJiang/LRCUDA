@@ -16,6 +16,8 @@ LRMultipleGPU <- function(para){
     result <- .Call("LRCUDA", x, y, n.comb, error.threshhold, fold, device.id, start, stop)
     print('LM1') 
     print(result)
-    return(t(matrix(result, nrow = n.comb + 1)))
+    result <- t(matrix(result, nrow = n.comb+1))
+    print(result)
+    return(result)
      
 }
