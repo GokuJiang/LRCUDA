@@ -36,6 +36,7 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     registerDoParallel(cl)
     clusterEvalQ(cl,library("FSCUDA"))
     para <- vector("list", device.num)
+    print(para)
     task.piece <- floor(task.num / device.num)
 
     for(i in 1:device.num){
