@@ -7,10 +7,10 @@
 combineResult <- function(result){
 
     #result is a list
+    
     result <- do.call(rbind, result)
     result <- as.data.frame(result)
 
-    print(result)
     features.num <- ncol(result) - 1
     header.names <- paste("feature", 1:features.num, sep=".")
     header.names <- c(header.names, "error")
