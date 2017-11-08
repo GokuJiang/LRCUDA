@@ -30,7 +30,7 @@ x <- matrix(as.numeric(unlist(x)),ncol = row.n,byrow=TRUE)
 
 y <- colon[1,2:column.n]
 y <- lapply(y,function(i) binaryzation(i))
-y <- as.integer(unlist(y))
+y <- as.numeric(unlist(y))
 
 result <- SemiExh(x, y,n.comb = 4, error.threshhold = 50, device.id = 0, cl=NULL)
 print(result)
