@@ -34,7 +34,7 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     }
 
     registerDoParallel(cl)
-
+    print(101010)
     clusterEvalQ(cl,library("FSCUDA"))
     para <- vector("list", device.num)
     task.piece <- floor(task.num / device.num)
@@ -47,7 +47,8 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
             para[[device.num]]$stop = task.num
     }
     #result <- clusterApply(cl, para, LRMultipleGPU)
+    print(33333)
     result <- clusterApply(cl,para, LRSingleGPU)
-    print(55555)
+    print(44444)
     return(combineResult(result))
 }
