@@ -25,9 +25,6 @@ column.n <- shape[2] #62
 
 gpu.ids <- getGPUIds()
 
-#print(row.n)
-#print(column.n)
-
 x <- colon[1:row.n,2:column.n]
 
 x <- matrix(as.numeric(unlist(x)),ncol = row.n,byrow=TRUE)
@@ -42,11 +39,9 @@ y <- as.integer(unlist(y))
 print(typeof(y))
 print(y)
 
-#y <- list(unlist(y),ncol = 1,byrow=TRUE)
-
 write.csv(x, 'Colon_X.csv')
 write.csv(y, 'Colon_y.csv')
 
 
-result <- SemiExh(x, y,n.comb = 3, error.threshhold = 50, device.id = gpu.ids, cl=NULL)
+result <- SemiExh(x, y,n.comb = 3, error.threshhold = 50, device.id = gpu.ids[1], cl=NULL)
 print(result)
