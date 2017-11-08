@@ -56,5 +56,6 @@ LRCUDA <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, device.id
     
     #result <- clusterApply(cl, para, LRSingleGPU)
     
+    print(result)
     return(combineResult(result))
 }
