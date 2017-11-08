@@ -37,5 +37,5 @@ print(typeof(y))
 print(typeof(gpu.ids[1]))
 print(typeof(gpu.ids[[1]])
 
-result <- SemiExh(x, y,n.comb = 3, error.threshhold = 50, device.id = gpu.ids[1], cl=NULL)
+result <- SemiExh(x, y,n.comb = 3, error.threshhold = 50, device.id = 0, cl=NULL)
 print(result)
