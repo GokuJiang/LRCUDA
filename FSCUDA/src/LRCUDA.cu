@@ -793,7 +793,7 @@ void SearchCombn(int n, long long start, long long stop){
 				cudaMemcpy(dev_acc, acc, sizeof(int) * num_combn,
 						cudaMemcpyHostToDevice);
 
-				num = 0;
+				//num = 0;
 				combn[num * n] = i;
 				num++;
 				printf("last num = %d", num);
