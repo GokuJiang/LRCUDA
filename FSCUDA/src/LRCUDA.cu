@@ -748,7 +748,7 @@ void SearchCombn(int n, long long start, long long stop){
 			}
 
 			if (num < num_combn) {
-				printf("num=%d \t num_combn=%d",num,num_combn);
+				printf("num=%d \t num_combn=%d\n",num,num_combn);
 				combn[num * n] = i;
 				num++;
 			}else {
