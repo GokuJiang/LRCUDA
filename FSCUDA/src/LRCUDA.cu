@@ -944,9 +944,9 @@ void SearchCombn(int n, long long start, long long stop){
 						combn[num * n + 2] = k;
 						num++;
 					} else {
-						//printf("finish combn 3 features, start exe in GPU.\n");
-						//printf("i = %d,j = %d, k = %d, num = %d\n", i, j, k,
-					        //			num);
+						printf("finish combn 3 features, start exe in GPU.\n");
+						printf("i = %d,j = %d, k = %d, num = %d\n", i, j, k,num);
+						
 						cudaMemcpy(dev_combn, combn,
 								sizeof(int) * n * num_combn,
 								cudaMemcpyHostToDevice);
@@ -1577,22 +1577,6 @@ void InitCrossValidation(float* y , int nind, int fold){
 	cv.dev_train_h = dev_train_h;
 	cv.dev_test_h = dev_test_h;
 
-//	// test
-//	for(int i = 0; i < fold; i ++){
-//		printf("fold %d\n", i);
-//		printf("train num %d\n", train_num[i]);
-//		for(int j = 0; j < train_num[i]; j ++){
-//			printf("%d,", train[i][j]);
-//		}
-//		printf("\n");
-//		printf("test num %d\n", test_num[i]);
-//		for(int j = 0; j < test_num[i]; j++) {
-//			printf("%d,", test[i][j]);
-//		}
-//		printf("\n");
-//
-//	}
-
 
 
 }
@@ -1601,7 +1585,7 @@ void InitDeviceData() {
 	int nind = data_file.nrow;
 	int np = data_file.ncol - 1;
 
-	int i, j, k;
+	int i;
 
 	/*
 	 * alloc Y memory
@@ -1907,9 +1891,6 @@ SEXP LRCUDAWithFixedVal(SEXP x, SEXP y, SEXP num_comb, SEXP error_threshhold, SE
 }
 
 }
-
-
-
 
 extern "C" {
 

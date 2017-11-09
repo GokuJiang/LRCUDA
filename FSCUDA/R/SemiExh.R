@@ -19,7 +19,9 @@ LRWithFixedVal <- function(para){
     device.id <- para$device.id
     fixed.features <- para$fixed.features
     
+    
     result <- .Call("LRCUDAWithFixedVal", t(x), y, as.integer(n.comb), as.integer(error.threshhold), as.integer(fold), as.integer(device.id), t(fixed.features), nrow(fixed.features), ncol(fixed.features))
+
 
     #######################################################
     #output format should be consistent
@@ -66,20 +68,8 @@ LRWithFixedValMG <- function(x, y, n.comb = 1, error.threshhold = 0 , fold = 10,
     for(i in 1:device.num){
         if(i != device.num){
             para[[i]] <- list(x = x, y = y, n.comb = n.comb, error.threshhold = error.threshhold, fold = fold, device.id = device.id[i], fixed.features = as.matrix(fixed.features[((i-1)*task.piece + 1):(i*task.piece),]))
-            #print(n.comb)
-            #print(error.threshhold)
-            #print(fold)
-            #print(device.id[i])
-            #print(nrow(fixed.features[((i-1)*task.piece + 1):(i*task.piece),]))
-            #print(ncol(fixed.features[((i-1)*task.piece + 1):(i*task.piece),]))
-        }else{
+                   }else{
             para[[i]] <- list(x = x, y = y, n.comb = n.comb, error.threshhold = error.threshhold, fold = fold, device.id = device.id[i], fixed.features = as.matrix(fixed.features[((i-1)*task.piece + 1):(nrow(fixed.features)),]))
-            #print(n.comb)
-            #print(error.threshhold)
-            #print(fold)
-            #print(device.id[i])
-            #print(nrow(fixed.features[((i-1)*task.piece + 1):(nrow(fixed.features)),]))
-            #print(ncol(fixed.features[((i-1)*task.piece + 1):(nrow(fixed.features)),]))
         }
         
     }
