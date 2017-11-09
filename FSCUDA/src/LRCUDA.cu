@@ -574,7 +574,6 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 	int it = 0;   //  迭代的次数
 
 	float T[ATTR_NUM][ATTR_NUM];
-//			float T_T[ATTR_NUM][ATTR_NUM];
 
 	float ncoef[ATTR_NUM];
 
@@ -695,6 +694,7 @@ int IsInFixedFeatures(int feature, int i_fixed_features_set){
 }
 
 void SearchCombn(int n, long long start, long long stop){
+	printf("n=%d, start=%d, stop=%d",n,start,stop)
 
 	int features_num = dev_matrix.np - 1;
 	int nind = dev_matrix.nind;
