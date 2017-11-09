@@ -931,7 +931,7 @@ void SearchCombn(int n, long long start, long long stop){
 				for (int k = j + 1; k <= features_num; k++) {
 
 					counter ++;
-					printf("counter is: %d \n",counter);
+					//printf("counter is: %d \n",counter);
 										
 					if(counter < start){
 						continue;
@@ -939,13 +939,19 @@ void SearchCombn(int n, long long start, long long stop){
 					if(counter > stop){
 						break;
 					}
-
+					printf("1");
+					printf("\n");
 					if (num < num_combn) {
+						printf("2.1");
+						printf("\n");
 						combn[num * n] = i;
 						combn[num * n + 1] = j;
 						combn[num * n + 2] = k;
 						num++;
 					} else {
+						printf("2.2");
+						printf("\n");
+
 						printf("finish combn 3 features, start exe in GPU.\n");
 						printf("i = %d,j = %d, k = %d, num = %d\n", i, j, k,num);
 						
@@ -959,6 +965,7 @@ void SearchCombn(int n, long long start, long long stop){
 								dev_combn, num, n+1,  X, Y,
 								all_valid, train, training_num, test, test_num,
 								fold, dev_acc);
+								
 						cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 								cudaMemcpyDeviceToHost);
 						for (int index = 0; index < num; ++index) {
@@ -996,7 +1003,7 @@ void SearchCombn(int n, long long start, long long stop){
 			}
 		}
 		if (num != 0) {
-			//printf("num = %d\n", num);
+			printf("num = %d\n", num);
 			cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,
 					cudaMemcpyHostToDevice);
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
