@@ -24,8 +24,8 @@
 #include<string.h>
 #include<cuda.h>
 #include<time.h>
-#include "R.h"
-#include "Rinternals.h"
+#include<R.h>
+#include<Rinternals.h>
 
 #define ATTR_NUM 10
 #define INST_NUM 1000
@@ -43,7 +43,9 @@ typedef struct file_struct{
 	int ncol;
 } fileStruct;
 
+fileStruct data_file;
 
+float** matrix;
 
 typedef struct device_data{
 	float** dev_x;
@@ -53,6 +55,7 @@ typedef struct device_data{
 	float** dev_x_h;
 }deviceData;
 
+deviceData dev_matrix;
 
 typedef struct cross_validation{
 	int fold;
@@ -67,13 +70,17 @@ typedef struct cross_validation{
 	float accuracy_threshhold;
 	int error_threshhold;
 }crossValidation;
-
+crossValidation cv;
 
 typedef struct tread_struct{
 	dim3 dim_grid;
 	dim3 dim_block;
 }treadStruct;
 
+treadStruct thread_config;
+
+int maxThreadsPerBlock;
+int maxBlocksPerGrid;
 
 typedef struct features_combn_result{
 	//int* feature1;
@@ -82,26 +89,11 @@ typedef struct features_combn_result{
 	//int* error_num;
 	int size;
 	int num;
-	int unit_size;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+	int unit_size;
 	int* features_error;  //store features and error
 
 
 }FeaturesCombnResult;
-
-fileStruct data_file;
-
-float** matrix;
-
-deviceData dev_matrix;
-
-crossValidation cv;
-
-treadStruct thread_config;
-
-int maxThreadsPerBlock;
-
-int maxBlocksPerGrid;
-
 FeaturesCombnResult result;
 
 int n_comb = 2;
@@ -136,7 +128,7 @@ float** read_csv(char* filename, int nrow, int ncol) {
 	char StrLine[50000];
 
 	if ((fp = fopen(filename, "r")) == NULL) {
-		//printf("error!");
+		printf("error!");
 		exit(-1);
 	}
 
@@ -459,7 +451,8 @@ __device__ void svd_inverse(float u[ATTR_NUM][ATTR_NUM],int* flag, int np){
 
 			//const float eps = 1e-24;
 			const float eps = 1e-8;  // because the float
-			
+
+
 			int n = np;
 
 			float w[ATTR_NUM];
@@ -471,6 +464,7 @@ __device__ void svd_inverse(float u[ATTR_NUM][ATTR_NUM],int* flag, int np){
 			(*flag) = svdcmp(u, w, v, np);
 
 			//__syncthreads();
+
 
 			// Look for singular values
 			float wmax = 0;
@@ -529,9 +523,10 @@ void InitThreadConfig(int grid_x, int grid_y, int grid_z, int block_x, int block
 
 
 __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
-		float** X, float* Y, int** train, int training_num,
+		float** X, float* Y, int all_valid, int** train, int training_num,
 		int** test, int test_num, int fold, int* acc) {
 
+	//int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	int tid = gridDim.x * blockDim.x * blockIdx.y + blockIdx.x * blockDim.x
 			+ threadIdx.x;
 
@@ -576,17 +571,18 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 	// Newton-Raphson to fit logistic model
 
 	int converge = 0;
-	int it = 0;   //  ???????????????
+	int it = 0;   //  迭代的次数
 
 	float T[ATTR_NUM][ATTR_NUM];
+//			float T_T[ATTR_NUM][ATTR_NUM];
 
 	float ncoef[ATTR_NUM];
 
 	while (!converge && it < 20) {
 
-		for (int i = 0; i < nind; i++) { //nind ??????????????????
+		for (int i = 0; i < nind; i++) { //nind 训练集的个数
 			float t = 0;
-			for (int j = 0; j < np; j++) {  //np ????????????
+			for (int j = 0; j < np; j++) {  //np 变量个数
 
 				t += coef[j] * X[train[fold][i]][features[j]];
 
@@ -614,6 +610,7 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 		svd_inverse(T, &flag, np);
 
 		if (!flag) {
+			all_valid = 0;
 			return;
 		}
 		__syncthreads();
@@ -625,7 +622,8 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 			for (int j = 0; j < nind; j++)
 				for (int k = 0; k < np; k++) {
 
-					ncoef[i] += (T[i][k] * X[train[fold][j]][features[k]]) * (Y[train[fold][j]] - p[j]);
+					ncoef[i] += (T[i][k] * X[train[fold][j]][features[k]])
+							* (Y[train[fold][j]] - p[j]);
 				}
 
 		// Update coefficients, and check for
@@ -664,10 +662,10 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np,
 
 
 __global__ void LRNCV(int* dev_combn, int valid_num, int np, float** X, float* Y,
-                    int** train,int* training_num, int** test,
-	            	int* test_num, int fold,int* acc){
+		int all_valid, int** train,int* training_num, int** test,
+		int* test_num, int fold,int* acc){
 	for(int i = 0; i < fold; i ++){
-		fitLMNWithCV(dev_combn, valid_num, np, X, Y, train, training_num[i],
+		fitLMNWithCV(dev_combn, valid_num, np, X, Y, all_valid, train, training_num[i],
 				test, test_num[i], i, acc);
 			__syncthreads();
 
@@ -702,6 +700,7 @@ void SearchCombn(int n, long long start, long long stop){
 	int nind = dev_matrix.nind;
 	float** X = dev_matrix.dev_x;
 	float* Y = dev_matrix.dev_y;
+	int all_valid = 1;
 	int** train = cv.dev_train;
 	int** test = cv.dev_test;
 	int* training_num = cv.dev_train_num;
@@ -759,7 +758,7 @@ void SearchCombn(int n, long long start, long long stop){
 
 				InitThreadConfig(maxBlocksPerGrid, 1, 1, maxThreadsPerBlock, 1, 1);
 				LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-						dev_combn, num, n + 1,  X, Y,
+						dev_combn, num, n + 1,  X, Y, all_valid,
 						train, training_num, test, test_num, fold, dev_acc);
 				cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 						cudaMemcpyDeviceToHost);
@@ -770,6 +769,8 @@ void SearchCombn(int n, long long start, long long stop){
 						result.num += 1;
 						if(result.num >= result.size){
 							result.size += 10000;
+							//result.feature1 = (int*)realloc(result.feature1, result.size*sizeof(int));
+							//result.error_num = (int*)realloc(result.error_num, result.size*sizeof(int));
 							result.features_error = (int*)realloc(result.features_error, result.size*sizeof(int)*(n+1));
 						}
 
@@ -803,7 +804,7 @@ void SearchCombn(int n, long long start, long long stop){
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
 					maxThreadsPerBlock, 1, 1);
 			LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-					dev_combn, num, n+1,  X, Y, train,
+					dev_combn, num, n+1,  X, Y, all_valid, train,
 					training_num, test, test_num, fold, dev_acc);
 			cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 					cudaMemcpyDeviceToHost);
@@ -853,7 +854,7 @@ void SearchCombn(int n, long long start, long long stop){
 							1);
 					LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
 							dev_combn, num, n + 1, X, Y,
-							 train, training_num, test, test_num,
+							all_valid, train, training_num, test, test_num,
 							fold, dev_acc);
 					cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 							cudaMemcpyDeviceToHost);
@@ -900,7 +901,7 @@ void SearchCombn(int n, long long start, long long stop){
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
 					maxThreadsPerBlock, 1, 1);
 			LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-					dev_combn, num, n+1,  X, Y, train,
+					dev_combn, num, n+1,  X, Y, all_valid, train,
 					training_num, test, test_num, fold, dev_acc);
 			cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 					cudaMemcpyDeviceToHost);
@@ -954,7 +955,7 @@ void SearchCombn(int n, long long start, long long stop){
 								1, 1);
 						LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
 								dev_combn, num, n+1,  X, Y,
-							 train, training_num, test, test_num,
+								all_valid, train, training_num, test, test_num,
 								fold, dev_acc);
 						cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 								cudaMemcpyDeviceToHost);
@@ -999,7 +1000,7 @@ void SearchCombn(int n, long long start, long long stop){
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
 					maxThreadsPerBlock, 1, 1);
 			LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-					dev_combn, num, n+1, X, Y, train,
+					dev_combn, num, n+1, X, Y, all_valid, train,
 					training_num, test, test_num, fold, dev_acc);
 			cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 					cudaMemcpyDeviceToHost);
@@ -1024,8 +1025,8 @@ void SearchCombn(int n, long long start, long long stop){
 		}
 
 	}else{
-		printf("%d combination is not supported now.\n", n);
-
+		//printf("%d combination is not supported now.\n", n);
+		exit(-1);
 	}
 	//fclose(out);
 
@@ -1037,17 +1038,25 @@ void SearchCombn(int n, long long start, long long stop){
 void InitFixedFeatures(SEXP fixed_features_sexp, SEXP nrow, SEXP ncol){
 
 	fixed_features_size  = *INTEGER(ncol);
+	//test
+	//printf("%d\n", fixed_features_size);
 
 	fixed_features_set_size = *INTEGER(nrow);
-	
+	//test
+	//printf("%d\n", fixed_features_set_size);
+	//test
+	//printf("%d\n", length(fixed_features_sexp));
+
 	fixed_features_set = (int*)malloc(sizeof(int) * length(fixed_features_sexp));
 
     int* fixed_p = INTEGER(fixed_features_sexp);
 
     for(int i = 0 ; i < length(fixed_features_sexp); i ++){
     	fixed_features_set[i] = fixed_p[i];
-       
+        //test
+    	//printf("%d ", fixed_features_set[i]);
     }
+    //printf("\n");
 
 }
 
@@ -1059,6 +1068,7 @@ void SearchCombnFix(int n){
 	int nind = dev_matrix.nind;
 	float** X = dev_matrix.dev_x;
 	float* Y = dev_matrix.dev_y;
+	int all_valid = 1;
 	int** train = cv.dev_train;
 	int** test = cv.dev_test;
 	int* training_num = cv.dev_train_num;
@@ -1076,8 +1086,8 @@ void SearchCombnFix(int n){
 	int num_combn = maxThreadsPerBlock * maxBlocksPerGrid;
 	//int *combn = (int*)malloc(sizeof(int)*n*num_combn);
 
-        int feature_num_in_model = n + fixed_features_size; // exclude x0
-        int *combn = (int*)malloc(sizeof(int) * feature_num_in_model * num_combn);
+    int feature_num_in_model = n + fixed_features_size; // exclude x0
+    int *combn = (int*)malloc(sizeof(int) * feature_num_in_model * num_combn);
 	int num = 0;
 	cudaMalloc((void**)&dev_combn, sizeof(int)*feature_num_in_model*num_combn);
 
@@ -1089,23 +1099,40 @@ void SearchCombnFix(int n){
 	cudaMalloc((void**)&dev_acc, sizeof(int)*num_combn);
 	cudaMemcpy(dev_acc, acc, sizeof(int)*num_combn, cudaMemcpyHostToDevice);
         
+	//char output_file_name[MAXSTR] = "output.csv";
+
+	//FILE *out = fopen(output_file_name,"w");
+
+
+        
 	InitResult(feature_num_in_model + 1);  // +1 mean error_num column
 
     for(int i_set = 0; i_set < fixed_features_set_size; i_set ++){
+    //printf("fixed_features_set_size = %d\n", fixed_features_set_size);
 	if (1 == n) {
+		//test
+		//printf("1 == n features_num = %d\n", features_num);
 		for (int i = 1; i <= features_num; i++) {
             if(IsInFixedFeatures(i, i_set)){
-             
+                 //test
+            	 //printf("continue i = %d\n", i);
                  continue;
             }
-                
+                        
+
+
 			if (num < num_combn) {
-			
+				//test
+				//printf("num < num_combn\n");
                 for(int i_fixed_feature = 0; i_fixed_feature < fixed_features_size; ++ i_fixed_feature){
                     combn[num*feature_num_in_model + i_fixed_feature] = fixed_features_set[i_set *fixed_features_size + i_fixed_feature];
-                   
+                    //test
+                    //printf("%d ", combn[num*feature_num_in_model + i_fixed_feature]);
                 }
 		        combn[num * feature_num_in_model + fixed_features_size] = i;
+		        //printf("%d ", combn[num * feature_num_in_model + fixed_features_size]);
+		        //test
+		        //printf("\n");
 		        num++;
 			} else {
 				printf("finish combn 1 features, start exe in GPU.\n");
@@ -1115,7 +1142,7 @@ void SearchCombnFix(int n){
 
 				InitThreadConfig(maxBlocksPerGrid, 1, 1, maxThreadsPerBlock, 1, 1);
 				LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-						dev_combn, num, feature_num_in_model + 1,  X, Y,
+						dev_combn, num, feature_num_in_model + 1,  X, Y, all_valid,
 						train, training_num, test, test_num, fold, dev_acc);
 				cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 						cudaMemcpyDeviceToHost);
@@ -1124,10 +1151,12 @@ void SearchCombnFix(int n){
                         result.num += 1;
 						if(result.num >= result.size){
 							result.size += 10000;
-						
+							//result.feature1 = (int*)realloc(result.feature1, result.size*sizeof(int));
+							//result.error_num = (int*)realloc(result.error_num, result.size*sizeof(int));
 							result.features_error = (int*)realloc(result.features_error, result.size*sizeof(int)*(feature_num_in_model+1));
 						}
-
+						//result.feature1[result.num - 1] =  combn[index * feature_num_in_model + fixed_features_size];
+						//result.error_num[result_num - 1] = acc[index];
 						for(int i_feature = 0; i_feature < feature_num_in_model; i_feature ++){
 							result.features_error[(result.num - 1)*(feature_num_in_model + 1) + i_feature] = combn[feature_num_in_model*index + i_feature];
 						}
@@ -1136,14 +1165,17 @@ void SearchCombnFix(int n){
 					}
 
 				}
+				//fflush(out);
 
 				for (int h = 0; h < num_combn; h++) {
 					acc[h] = nind;
 				}
-				cudaMemcpy(dev_acc, acc, sizeof(int) * num_combn,	cudaMemcpyHostToDevice);
+				cudaMemcpy(dev_acc, acc, sizeof(int) * num_combn,
+						cudaMemcpyHostToDevice);
 
 				num = 0;
 
+				//combn[num * n] = i;
                 for(int i_fixed_feature = 0; i_fixed_feature < fixed_features_size; ++ i_fixed_feature){
                      combn[num*feature_num_in_model + i_fixed_feature] = fixed_features_set[i_set *fixed_features_size + i_fixed_feature];
                 }
@@ -1164,6 +1196,8 @@ void SearchCombnFix(int n){
 				    continue;
 				}
                                 
+
+
 				if (num < num_combn) {
 					 for(int i_fixed_feature = 0; i_fixed_feature < fixed_features_size; ++ i_fixed_feature){
 					     combn[num*feature_num_in_model + i_fixed_feature] = fixed_features_set[i_set *fixed_features_size + i_fixed_feature];
@@ -1173,6 +1207,8 @@ void SearchCombnFix(int n){
 				     num++;
 
 				} else {
+					//printf("finish combn 2 features, start exe in GPU.\n");
+					//printf("i = %d,j = %d, num = %d\n", i, j,num);
 					cudaMemcpy(dev_combn, combn, sizeof(int) * fixed_features_size * num_combn,
 							cudaMemcpyHostToDevice);
 
@@ -1180,7 +1216,7 @@ void SearchCombnFix(int n){
 							1);
 					LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
 							dev_combn, num, fixed_features_size + 1, X, Y,
-							train, training_num, test, test_num,
+							all_valid, train, training_num, test, test_num,
 							fold, dev_acc);
 					cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 							cudaMemcpyDeviceToHost);
@@ -1191,6 +1227,8 @@ void SearchCombnFix(int n){
 								result.size += 10000;
 								result.features_error = (int*)realloc(result.features_error, result.size*sizeof(int)*(feature_num_in_model+1));
 							}
+							//result.feature1[result.num - 1] =  combn[index * feature_num_in_model + fixed_features_size];
+							//result.error_num[result_num - 1] = acc[index];
 							for(int i_feature = 0; i_feature < feature_num_in_model; i_feature ++ ){
 								result.features_error[(result.num - 1)*(feature_num_in_model + 1) + i_feature] = combn[feature_num_in_model*index + i_feature];
 							}
@@ -1200,6 +1238,7 @@ void SearchCombnFix(int n){
 
 
 					}
+					//fflush(out);
 
 					for (int h = 0; h < num_combn; h++) {
 						acc[h] = nind;
@@ -1213,6 +1252,8 @@ void SearchCombnFix(int n){
 					}
 	                combn[num * feature_num_in_model + fixed_features_size] = i;
 	                combn[num * feature_num_in_model + fixed_features_size + 1] = j;
+
+
 
 					num++;
 
@@ -1240,6 +1281,9 @@ void SearchCombnFix(int n){
 		                 combn[num * feature_num_in_model + fixed_features_size + 2] = k;
 					     num++;
 					} else {
+						//printf("finish combn 3 features, start exe in GPU.\n");
+						//printf("i = %d,j = %d, k = %d, num = %d\n", i, j, k,
+					        //			num);
 						cudaMemcpy(dev_combn, combn,
 								sizeof(int) * n * num_combn,
 								cudaMemcpyHostToDevice);
@@ -1248,12 +1292,16 @@ void SearchCombnFix(int n){
 								1, 1);
 						LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
 								dev_combn, num, n+1,  X, Y,
-								 train, training_num, test, test_num,
+								all_valid, train, training_num, test, test_num,
 								fold, dev_acc);
 						cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 								cudaMemcpyDeviceToHost);
 						for (int index = 0; index < num; ++index) {
 							if(acc[index] <= error_threshhold){
+								//fprintf(out,"%d,%d,%d,%d\n", combn[index * n],
+								//	combn[index * n + 1], combn[index * n + 2],
+								//	acc[index]);
+
 								result.num += 1;
 								if(result.num >= result.size){
 									result.size += 10000;
@@ -1267,6 +1315,7 @@ void SearchCombnFix(int n){
 
 							}
 						}
+						//fflush(out);
 
 						for (int h = 0; h < num_combn; h++) {
 							acc[h] = nind;
@@ -1290,28 +1339,32 @@ void SearchCombnFix(int n){
 		}
 
 	}else{
+		//printf("%d combination is not supported now.\n", n);
 		exit(-1);
 	}
+	//printf("i_set = %d\n", i_set);
 
     }
 
     if (num != 0 & 1 == n) {
 
-		//printf("lala num is not equal 0 , num = %d\n", num);
+		printf("lala num is not equal 0 , num = %d\n", num);
 		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
 				cudaMemcpyHostToDevice);
 		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
 				maxThreadsPerBlock, 1, 1);
-		//printf("before LRNCV\n");
+		printf("before LRNCV\n");
 		LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(dev_combn,
-				num, feature_num_in_model + 1, X, Y, train, training_num, test,
+				num, feature_num_in_model + 1, X, Y, all_valid, train, training_num, test,
 				test_num, fold, dev_acc);
 		//test
-		//printf("after LRNCV\n");
+		printf("after LRNCV\n");
 		cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn, cudaMemcpyDeviceToHost);
 		for (int index = 0; index < num; ++index) {
 
 			if (acc[index] <= error_threshhold) {
+				//fprintf(out,"%d,%d\n", combn[index * n],acc[index]);
+				//printf("acc : %d\n", acc[index]);
 				result.num += 1;
 				if (result.num >= result.size) {
 					result.size += 10000;
@@ -1320,20 +1373,26 @@ void SearchCombnFix(int n){
 
 				for(int i_feature = 0; i_feature < feature_num_in_model; i_feature ++){
 					result.features_error[(result.num - 1)*(feature_num_in_model + 1) + i_feature] = combn[feature_num_in_model*index + i_feature];
+					//test
+					//printf("%d ", result.features_error[(result.num - 1)*(feature_num_in_model + 1) + i_feature]);
 				}
 
 				result.features_error[(result.num - 1)*(feature_num_in_model + 1) + feature_num_in_model] = acc[index];
-			
+				//test
+				//printf("%d ", result.features_error[(result.num - 1)*(feature_num_in_model + 1) + feature_num_in_model]);
+				//printf("\n");
 			}
 		}
+		//fflush(out);
 	}
 	if (num != 0 && 2 == n) {
+		//printf("num = %d\n", num);
 		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
 				cudaMemcpyHostToDevice);
 		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
 				maxThreadsPerBlock, 1, 1);
 		LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(dev_combn,
-				num, feature_num_in_model + 1, X, Y, train, training_num, test,
+				num, feature_num_in_model + 1, X, Y, all_valid, train, training_num, test,
 				test_num, fold, dev_acc);
 		cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn, cudaMemcpyDeviceToHost);
 		for (int index = 0; index < num; ++index) {
@@ -1345,21 +1404,25 @@ void SearchCombnFix(int n){
 					result.size += 10000;
 					result.features_error = (int*)realloc(result.features_error, result.size*sizeof(int)*(feature_num_in_model+1));
 				}
+				//result.feature1[result.num - 1] =  combn[index * feature_num_in_model + fixed_features_size];
+				//result.error_num[result_num - 1] = acc[index];
 				for(int i_feature = 0; i_feature < feature_num_in_model; i_feature ++ ){
 					result.features_error[(result.num - 1)*(feature_num_in_model + 1) + i_feature] = combn[feature_num_in_model*index + i_feature];
 				}
 				result.features_error[(result.num - 1)*(feature_num_in_model + 1) + feature_num_in_model] = acc[index];
 
 		    }
+		//fflush(out);
 	    }
 	}
 
 	if (num != 0 && 3 == n) {
+		//printf("num = %d\n", num);
 		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
 				cudaMemcpyHostToDevice);
 		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1, maxThreadsPerBlock, 1, 1);
 		LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-				dev_combn, num, feature_num_in_model+1, X, Y, train,
+				dev_combn, num, feature_num_in_model+1, X, Y, all_valid, train,
 				training_num, test, test_num, fold, dev_acc);
 		cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn, cudaMemcpyDeviceToHost);
 		for (int index = 0; index < num; ++index) {
@@ -1424,14 +1487,6 @@ void InitCrossValidation(float* y , int nind, int fold){
 	int lable_zero_block = lable_zero_num / fold;
 	int lable_zero_left = lable_zero_num % fold;
 
-    /*
-	if (fold == 1) {
-        	lable_one_block = 0;
-        	lable_one_left  = lable_one_num;
-        	lable_zero_block = 0;
-        	lable_zero_left = lable_zero_num;
-    }
-    */
 	int** train = (int**)malloc(sizeof(int*)*fold);
 	for(int i = 0; i < fold; i ++){
 		train[i] = (int*)malloc(sizeof(int)*nind);
@@ -1447,23 +1502,19 @@ void InitCrossValidation(float* y , int nind, int fold){
 		test_num[i] = 0;
 		for(int j = lable_one_block*i; j < lable_one_block*(i+1); j ++){
 			test[i][test_num[i]] = lable_one[j];
-
 			test_num[i]++;
 		}
 		if(i < lable_one_left){
 			test[i][test_num[i]] = lable_one[fold*lable_one_block+i];
-
 			test_num[i]++;
 		}
 
 		for (int j = lable_zero_block * i; j < lable_zero_block * (i + 1); j++) {
 			test[i][test_num[i]] = lable_zero[j];
-
 			test_num[i]++;
 		}
 		if (i < lable_zero_left) {
 			test[i][test_num[i]] = lable_zero[fold * lable_zero_block + i];
-
 			test_num[i]++;
 		}
 
@@ -1474,7 +1525,6 @@ void InitCrossValidation(float* y , int nind, int fold){
 				continue;
 			}else{
 				train[i][train_num[i]] = lable_one[j];
-
 				train_num[i]++;
 			}
 		}
@@ -1483,13 +1533,11 @@ void InitCrossValidation(float* y , int nind, int fold){
 				continue;
 			}else{
 				train[i][train_num[i]] = lable_zero[j];
-
 				train_num[i]++;
 			}
 		}
 
 	}
-
 
 	int** dev_test_h = (int**) malloc(sizeof(int*) * fold);
 	for (int i = 0; i < fold; i++) {
@@ -1497,7 +1545,6 @@ void InitCrossValidation(float* y , int nind, int fold){
 		cudaMemcpy(dev_test_h[i], test[i], sizeof(int) * nind,
 				cudaMemcpyHostToDevice);
 	}
-
 	int** dev_test;
 	cudaMalloc((void**) &dev_test, fold * sizeof(int*));
 	cudaMemcpy(dev_test, dev_test_h, sizeof(int*) * fold, cudaMemcpyHostToDevice);
@@ -1509,17 +1556,14 @@ void InitCrossValidation(float* y , int nind, int fold){
 		cudaMemcpy(dev_train_h[i], train[i], sizeof(int) * nind,
 				cudaMemcpyHostToDevice);
 	}
-
 	int** dev_train;
 	cudaMalloc((void**) &dev_train, fold * sizeof(int*));
 	cudaMemcpy(dev_train, dev_train_h, sizeof(int*) * fold,
 			cudaMemcpyHostToDevice);
 
-
 	int* dev_train_num;
 	cudaMalloc((void**)&dev_train_num, sizeof(int)*fold);
 	cudaMemcpy(dev_train_num, train_num, sizeof(int)*fold, cudaMemcpyHostToDevice);
-
 
 	int* dev_test_num;
 	cudaMalloc((void**)&dev_test_num, sizeof(int)*fold);
@@ -1533,13 +1577,31 @@ void InitCrossValidation(float* y , int nind, int fold){
 	cv.dev_train_h = dev_train_h;
 	cv.dev_test_h = dev_test_h;
 
+//	// test
+//	for(int i = 0; i < fold; i ++){
+//		printf("fold %d\n", i);
+//		printf("train num %d\n", train_num[i]);
+//		for(int j = 0; j < train_num[i]; j ++){
+//			printf("%d,", train[i][j]);
+//		}
+//		printf("\n");
+//		printf("test num %d\n", test_num[i]);
+//		for(int j = 0; j < test_num[i]; j++) {
+//			printf("%d,", test[i][j]);
+//		}
+//		printf("\n");
+//
+//	}
+
+
+
 }
 
 void InitDeviceData() {
 	int nind = data_file.nrow;
 	int np = data_file.ncol - 1;
 
-	int i;
+	int i, j, k;
 
 	/*
 	 * alloc Y memory
@@ -1793,21 +1855,20 @@ extern "C"{
 SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP error_threshhold, SEXP fold, SEXP device_id, SEXP start, SEXP stop){
 
     cudaSetDevice(*INTEGER(device_id));
-
 	cv.error_threshhold = *(INTEGER(error_threshhold));
-
+	//printf("%f\n", cv.error_threshhold);
 	cv.fold = *INTEGER(fold);
-
+	//printf("%d\n", cv.fold);
+	//printf("I am here\n");
 	InitDeviceData(x,y);
 
     InitGridBlock(65535,64);
+    //InitGridBlock(256,64);
+	//InitResult();
     n_comb = *INTEGER(num_comb);
-    
+	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
 
-    SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
- 
-   //printf("transefer result to r\n");
-    SEXP result = TransferResultToR();
+	SEXP result = TransferResultToR();
 	return result;
 
 
@@ -1838,7 +1899,6 @@ SEXP LRCUDAWithFixedVal(SEXP x, SEXP y, SEXP num_comb, SEXP error_threshhold, SE
     n_comb = *INTEGER(num_comb);
     //printf("following n_comb \n");
 
-	
 	SearchCombnFix(n_comb);
 
 	SEXP result = TransferResultToR();
@@ -1847,6 +1907,9 @@ SEXP LRCUDAWithFixedVal(SEXP x, SEXP y, SEXP num_comb, SEXP error_threshhold, SE
 }
 
 }
+
+
+
 
 extern "C" {
 
@@ -1880,6 +1943,13 @@ extern "C"{
         
     }
 }
+
+
+
+
+
+
+
 
 
 
