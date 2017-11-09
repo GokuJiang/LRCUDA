@@ -940,18 +940,12 @@ void SearchCombn(int n, long long start, long long stop){
 					if(counter > stop){
 						break;
 					}
-					printf("1");
-					printf("\n");
 					if (num < num_combn) {
-						printf("2.1");
-						printf("\n");
 						combn[num * n] = i;
 						combn[num * n + 1] = j;
 						combn[num * n + 2] = k;
 						num++;
 					} else {
-						printf("2.2");
-						printf("\n");
 
 						printf("finish combn 3 features, start exe in GPU.\n");
 						printf("i = %d,j = %d, k = %d, num = %d\n", i, j, k,num);
