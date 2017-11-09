@@ -734,7 +734,7 @@ void SearchCombn(int n, long long start, long long stop){
 	InitResult(n + 1);
 
 	long long counter = 0;
-	printf("feature_num=%d", features_num);
+	printf("feature_num=%d\", features_num);
 
 	if (1 == n) {
 		for (int i = 1; i <= features_num; i++) {
@@ -761,8 +761,10 @@ void SearchCombn(int n, long long start, long long stop){
 				LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
 						dev_combn, num, n + 1,  X, Y, all_valid,
 						train, training_num, test, test_num, fold, dev_acc);
+						
 				cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 						cudaMemcpyDeviceToHost);
+						
 				for (int index = 0; index < num; ++index) {
 					if(acc[index] <= error_threshhold){
 						//fprintf(out,"%d,%d\n", combn[index * n],acc[index]);
@@ -1851,8 +1853,8 @@ SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP error_threshhold, SEXP fold, SEX
 	//printf("I am here\n");
 	InitDeviceData(x,y);
 
-    InitGridBlock(65535,64);
-    //InitGridBlock(256,64);
+    //InitGridBlock(65535,64);
+    InitGridBlock(256,8);
 	//InitResult();
     n_comb = *INTEGER(num_comb);
 	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
