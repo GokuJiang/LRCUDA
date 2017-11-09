@@ -931,6 +931,8 @@ void SearchCombn(int n, long long start, long long stop){
 				for (int k = j + 1; k <= features_num; k++) {
 
 					counter ++;
+					printf("counter is: %d \n",counter);
+										
 					if(counter < start){
 						continue;
 					}
