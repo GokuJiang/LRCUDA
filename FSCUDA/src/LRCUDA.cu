@@ -734,7 +734,7 @@ void SearchCombn(int n, long long start, long long stop){
 	InitResult(n + 1);
 
 	long long counter = 0;
-	printf("feature_num=%d\", features_num);
+	printf("feature_num=%d\n", features_num);
 
 	if (1 == n) {
 		for (int i = 1; i <= features_num; i++) {
@@ -1032,7 +1032,7 @@ void SearchCombn(int n, long long start, long long stop){
 		}
 
 	}else{
-		//printf("%d combination is not supported now.\n", n);
+		printf("%d combination is not supported now.\n", n);
 		exit(-1);
 	}
 	//fclose(out);
