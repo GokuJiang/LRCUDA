@@ -21,7 +21,6 @@ LRSingleGPU <- function(para){
     stop <- as.integer(para$start)
   
     result <- .Call("LRCUDA", x, y, n.comb, error.threshhold, fold, device.id, start, stop)
-    print(222222)
     return(matrix(result, ncol = n.comb + 1))
 }
 
