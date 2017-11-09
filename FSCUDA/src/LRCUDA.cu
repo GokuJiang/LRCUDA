@@ -1854,7 +1854,7 @@ SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP error_threshhold, SEXP fold, SEX
 	InitDeviceData(x,y);
 
     //InitGridBlock(65535,64);
-    InitGridBlock(256,8);
+    InitGridBlock(256,4);
 	//InitResult();
     n_comb = *INTEGER(num_comb);
 	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
