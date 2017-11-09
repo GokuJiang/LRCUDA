@@ -734,10 +734,11 @@ void SearchCombn(int n, long long start, long long stop){
 	InitResult(n + 1);
 
 	long long counter = 0;
+	printf("feature_num=%d", features_num);
 
 	if (1 == n) {
 		for (int i = 1; i <= features_num; i++) {
-
+			
 			counter ++;
 			if(counter < start){
 				continue;
@@ -747,6 +748,7 @@ void SearchCombn(int n, long long start, long long stop){
 			}
 
 			if (num < num_combn) {
+				printf("num=%d \t num_combn=%d",num,num_combn);
 				combn[num * n] = i;
 				num++;
 			}else {
