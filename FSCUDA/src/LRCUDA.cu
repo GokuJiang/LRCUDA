@@ -748,7 +748,7 @@ void SearchCombn(int n, long long start, long long stop){
 			}
 
 			if (num < num_combn) {
-				printf("num=%d \t num_combn=%d\n",num,num_combn);
+				//printf("num=%d \t num_combn=%d\n",num,num_combn);
 				combn[num * n] = i;
 				num++;
 			}else {
@@ -794,7 +794,7 @@ void SearchCombn(int n, long long start, long long stop){
 				num = 0;
 				combn[num * n] = i;
 				num++;
-
+				printf("last num = %d", num);
 			}
 
 		}
@@ -809,6 +809,7 @@ void SearchCombn(int n, long long start, long long stop){
 					training_num, test, test_num, fold, dev_acc);
 			cudaMemcpy(acc, dev_acc, sizeof(int) * num_combn,
 					cudaMemcpyDeviceToHost);
+			
 			for (int index = 0; index < num; ++index) {
 				if(acc[index] <= error_threshhold){
 					result.num += 1;
