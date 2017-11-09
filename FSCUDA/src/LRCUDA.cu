@@ -795,7 +795,7 @@ void SearchCombn(int n, long long start, long long stop){
 
 				//num = 0;
 				combn[num * n] = i;
-				num++;
+//				num++;
 				printf("last num = %d", num);
 			}
 
