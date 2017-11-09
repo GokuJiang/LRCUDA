@@ -695,8 +695,6 @@ int IsInFixedFeatures(int feature, int i_fixed_features_set){
 
 void SearchCombn(int n, long long start, long long stop){
 	
-	printf("n=%d, start=%d, stop=%d",n,start,stop);
-
 	int features_num = dev_matrix.np - 1;
 	int nind = dev_matrix.nind;
 	float** X = dev_matrix.dev_x;
@@ -752,8 +750,8 @@ void SearchCombn(int n, long long start, long long stop){
 				combn[num * n] = i;
 				num++;
 			}else {
-				//printf("finish combn 1 features, start exe in GPU.\n");
-				//printf("i = %d,num = %d\n", i, num);
+				printf("finish combn 1 features, start exe in GPU.\n");
+				printf("i = %d,num = %d\n", i, num);
 				cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,
 						cudaMemcpyHostToDevice);
 
@@ -799,7 +797,7 @@ void SearchCombn(int n, long long start, long long stop){
 
 		}
 		if (num != 0) {
-			//printf("num = %d\n", num);
+			printf("num = %d\n", num);
 			cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,
 					cudaMemcpyHostToDevice);
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
@@ -829,7 +827,7 @@ void SearchCombn(int n, long long start, long long stop){
 		}
 
 	} else if (2 == n) {
-		printf("num=%d,\t num_combn=%d", num,num_combn);
+		printf("num=%d,\t num_combn=%d \n", num,num_combn);
 		for (int i = 1; i <= features_num; i++) {
 			for (int j = i + 1; j <= features_num; j++) {
 
@@ -888,6 +886,7 @@ void SearchCombn(int n, long long start, long long stop){
 							cudaMemcpyHostToDevice);
 
 					num = 0;
+					printf("num = %d\n", num);
 					combn[num * n] = i;
 					combn[num * n + 1] = j;
 					num++;
@@ -897,7 +896,6 @@ void SearchCombn(int n, long long start, long long stop){
 
 		}
 		if (num != 0) {
-			printf("num = %d\n", num);
 			cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,
 					cudaMemcpyHostToDevice);
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
@@ -933,7 +931,6 @@ void SearchCombn(int n, long long start, long long stop){
 				for (int k = j + 1; k <= features_num; k++) {
 
 					counter ++;
-					//printf("counter is: %d \n",counter);
 										
 					if(counter < start){
 						continue;
