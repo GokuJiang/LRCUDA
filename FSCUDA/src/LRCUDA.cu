@@ -829,6 +829,7 @@ void SearchCombn(int n, long long start, long long stop){
 		}
 
 	} else if (2 == n) {
+		printf("num=%d,\t num_combn=%d", num,num_combn);
 		for (int i = 1; i <= features_num; i++) {
 			for (int j = i + 1; j <= features_num; j++) {
 
@@ -843,7 +844,6 @@ void SearchCombn(int n, long long start, long long stop){
 				if (num < num_combn) {
 					combn[num * n] = i;
 					combn[num * n + 1] = j;
-
 					num++;
 				} else {
 					printf("finish combn 2 features, start exe in GPU.\n");
