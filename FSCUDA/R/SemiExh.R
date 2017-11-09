@@ -100,7 +100,7 @@ SemiExh <- function(x, y,n.comb =  3 ,error.threshhold = 0, fold = 1, device.id 
     result.l <- list()
     
     result.one <- LRCUDA(x = x, y = y, n.comb = n.comb, error.threshhold = length(y) / 2, fold = fold, device.id = device.id, cl = cl)
-    print(result.one
+    print(result.one)
     if(nrow(result.one) == 0){
          print("use one feature can't statisfy the error threshhold")
          return(result.l)
