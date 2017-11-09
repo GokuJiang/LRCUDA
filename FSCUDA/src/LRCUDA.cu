@@ -872,7 +872,7 @@ void SearchCombn(int n, long long start, long long stop){
 
 							for(int i_feature = 0; i_feature < n; i_feature ++){
 							    result.features_error[(result.num - 1)*(n + 1) + i_feature] = combn[n*index + i_feature];
-								printf("result.feature_errot[%d]=%lf", (result.num-1)*(n+1)+i_feature, combn[n*index + i_feature])
+								printf("result.feature_errot[%d]=%lf", (result.num-1)*(n+1)+i_feature, combn[n*index + i_feature]);
 							}
 							result.features_error[(result.num - 1)*(n + 1) + n] = acc[index];
 						}
