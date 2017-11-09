@@ -694,6 +694,7 @@ int IsInFixedFeatures(int feature, int i_fixed_features_set){
 }
 
 void SearchCombn(int n, long long start, long long stop){
+	
 	printf("n=%d, start=%d, stop=%d",n,start,stop);
 
 	int features_num = dev_matrix.np - 1;
