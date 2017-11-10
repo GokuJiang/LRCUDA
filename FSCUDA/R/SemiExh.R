@@ -105,8 +105,8 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
 
         print(paste("logloss.min.one", ll.min.one))
         if(pre.min.ll - ll.min.one <= ll.diff){
-            print(4)
-
+            print(paset("ll.min.one= ", ll.min.one))
+            print(l)
             return(result.l)
         }else{
             print(5)
