@@ -35,7 +35,7 @@ LRCUDA <- function(x, y, n.comb = 2, ll.threshhold , fold = 10, device.id = 0, c
     if(para[[device.num]]$stop < task.num){
             para[[device.num]]$stop = task.num
     }
-               
+    
     result <- clusterApply(cl, para, LRMultipleGPU)
     return(combineResult(result))
     stopCluster(cl)
@@ -57,8 +57,13 @@ LRMultipleGPU <- function(para){
      device.id <- para$device.id
      start <- para$start
      stop <- para$stop
+    print(paste("n.comb ",n.comb))
+    print(paste("ll.threshhold ",ll.threshhold))
+    print(paste("fold ",fold))
 
      result <- .Call("LRCUDA", t(x), y, as.integer(n.comb), as.numeric(ll.threshhold), as.integer(fold), as.integer(device.id), as.integer(start), as.integer(stop))
+    print(paste("result ",result))
+
      return(t(matrix(result, nrow = n.comb + 1)))
      
 }

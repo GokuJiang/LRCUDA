@@ -91,6 +91,7 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
         init.ll <- InitLogloss(y)
         pre.min.ll <- init.ll
         print(paste("init log loss is ", init.ll))
+        
         result.one <- LRCUDA(x = x, y = y, n.comb = 1, ll.threshhold = init.ll, fold = fold, device.id = device.id, cl = cl)
 
         print(1)
