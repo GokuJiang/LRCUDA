@@ -32,5 +32,5 @@ y <- colon[1,2:column.n]
 y <- lapply(y,function(i) binaryzation(i))
 y <- as.numeric(unlist(y))
 
-result <- SemiExh(x, y,n.comb = 1, error.threshhold = 50, device.id = 0, cl=NULL)
+result <- iFes(x, y,n.comb = 1, error.threshhold = 50, device.id = 0, cl=NULL)
 print(result)
