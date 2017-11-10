@@ -549,9 +549,6 @@ features[0] = 0;
 /*
  * add fixed features into the model.
  */
-//for(int i = 0; i < fixed_features_num_dev; ++ i){
-//    features[i+1] = fixed_features_dev[i];
-//}
 for (int i = 0; i < np - 1; i++) {
 	features[i + 1] = dev_combn[tid * (np - 1) + i];
 }
@@ -666,12 +663,6 @@ ll[tid] += loss;
 
 }
 
-
-//__device__ void fitLMN(int* dev_combn, int valid_num, int np, float** X,
-// float* Y, int all_valid, int** train, int training_num, int** test,
-//	int test_num, int fold, float* ll) {
-
-
 __device__ void fitLMN(int* dev_combn, int valid_num, int np, float** X,
        float* Y, int all_valid, int training_num,
        int test_num, float* ll){
@@ -692,9 +683,6 @@ features[0] = 0;
 /*
  * add fixed features into the model.
  */
-//for(int i = 0; i < fixed_features_num_dev; ++ i){
-//    features[i+1] = fixed_features_dev[i];
-//}
 for (int i = 0; i < np - 1; i++) {
 	features[i + 1] = dev_combn[tid * (np - 1) + i];
 }
@@ -807,40 +795,29 @@ ll[tid] += loss;
 }
 
 __global__ void LRNCV(int* dev_combn, int valid_num, int np, float** X,
-	float* Y, int all_valid, int** train, int* training_num, int** test,
-	int* test_num, int fold, float* ll) {
-for (int i = 0; i < fold; i++) {
-	fitLMNWithCV(dev_combn, valid_num, np, X, Y, all_valid, train,
+	float* Y, int all_valid, int** train, int* training_num, int** test, int* test_num, int fold, float* ll) {
+	for (int i = 0; i < fold; i++) {
+		fitLMNWithCV(dev_combn, valid_num, np, X, Y, all_valid, train,
 			training_num[i], test, test_num[i], i, ll);
-	__syncthreads();
+		__syncthreads();
 
-}
-//int sample_num = training_num[0] + test_num[0];
-//fitLMN(dev_combn, valid_num, np, X,
-//       Y, all_valid, sample_num,
-//       sample_num, ll);
-
+	}
 }
 
 void InitResult(int n) {
-result.size = 10000;
-result.num = 0;
-//result.feature1 = (int*)malloc(sizeof(int)*result.size);
-//result.feature2 = (int*)malloc(sizeof(int)*result.size);
-//result.feature3 = (int*)malloc(sizeof(int)*result.size);
-//result.error_num = (int*)malloc(sizeof(int)*result.size);
-result.unit_size = n;
-result.features_error = (float*) malloc(sizeof(float) * n * result.size);
+	result.size = 10000;
+	result.num = 0;
+	result.unit_size = n;
+	result.features_error = (float*) malloc(sizeof(float) * n * result.size);
 }
 
 int IsInFixedFeatures(int feature, int i_fixed_features_set) {
-for (int i = i_fixed_features_set * fixed_features_size;
-		i < (i_fixed_features_set + 1) * fixed_features_size; i++) {
-	if (feature == fixed_features_set[i]) {
-		return 1;
+	for (int i = i_fixed_features_set * fixed_features_size; i < (i_fixed_features_set + 1) * fixed_features_size; i++) {
+		if (feature == fixed_features_set[i]) {
+			return 1;
+		}
 	}
-}
-return 0;
+	return 0;
 }
 
 void SearchCombn(int n, long long start, long long stop) {
@@ -1543,127 +1520,125 @@ for (int i_set = 0; i_set < fixed_features_set_size; i_set++) {
 			}
 		}
 
-	} else {
-		//printf("%d combination is not supported now.\n", n);
-		return;
+		} else {
+			//printf("%d combination is not supported now.\n", n);
+			return;
+		}
 	}
-	//printf("i_set = %d\n", i_set);
 
-}
-
-if (num != 0 & 1 == n) {
+	if (num != 0 & 1 == n) {
 
 	
-	cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
+		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
 			cudaMemcpyHostToDevice);
-	InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
+		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
 			maxThreadsPerBlock, 1, 1);
 	
-	LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(dev_combn,
+		LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(dev_combn,
 			num, feature_num_in_model + 1, X, Y, all_valid, train, training_num, test,
 			test_num, fold, dev_ll);
 	//test
 	
-	cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
-	for (int index = 0; index < num; ++index) {
-
-		if (ll[index] <= ll_threshhold) {
+		cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
+		for (int index = 0; index < num; ++index) {
+	
+			if (ll[index] <= ll_threshhold) {
 			//fprintf(out,"%d,%d\n", combn[index * n],acc[index]);
 			//printf("acc : %d\n", acc[index]);
-			result.num += 1;
-			if (result.num >= result.size) {
-				result.size += 10000;
-				result.features_error = (float*) realloc(result.features_error,
+				result.num += 1;
+				if (result.num >= result.size) {
+					result.size += 10000;
+					result.features_error = (float*) realloc(result.features_error,
 						result.size * sizeof(float) * (feature_num_in_model + 1));
-			}
+				}
 
-			for (int i_feature = 0; i_feature < feature_num_in_model;
+				for (int i_feature = 0; i_feature < feature_num_in_model;
 					i_feature++) {
-				result.features_error[(result.num - 1)
+					result.features_error[(result.num - 1)
 						* (feature_num_in_model + 1) + i_feature] =
 						combn[feature_num_in_model * index + i_feature];
 				//test
 				//printf("%d ", result.features_error[(result.num - 1)*(feature_num_in_model + 1) + i_feature]);
-			}
+				}
 
-			result.features_error[(result.num - 1) * (feature_num_in_model + 1)
+				result.features_error[(result.num - 1) * (feature_num_in_model + 1)
 					+ feature_num_in_model] = ll[index];
-			//test
-			//printf("%d ", result.features_error[(result.num - 1)*(feature_num_in_model + 1) + feature_num_in_model]);
-			//printf("\n");
-		}
-	}
-	//fflush(out);
-}
-if (num != 0 && 2 == n) {
-	//printf("num = %d\n", num);
-	cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
-			cudaMemcpyHostToDevice);
-	InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
-			maxThreadsPerBlock, 1, 1);
-	LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(dev_combn,
-			num, feature_num_in_model + 1, X, Y, all_valid, train, training_num, test,
-			test_num, fold, dev_ll);
-	cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
-	for (int index = 0; index < num; ++index) {
-		if (ll[index] <= ll_threshhold) {
-
-			result.num += 1;
-
-			if (result.num >= result.size) {
-				result.size += 10000;
-				result.features_error = (float*) realloc(result.features_error,
-						result.size * sizeof(float) * (feature_num_in_model + 1));
+				//test
+				//printf("%d ", result.features_error[(result.num - 1)*(feature_num_in_model + 1) + feature_num_in_model]);
+				//printf("\n");
 			}
-			//result.feature1[result.num - 1] =  combn[index * feature_num_in_model + fixed_features_size];
-			//result.error_num[result_num - 1] = acc[index];
-			for (int i_feature = 0; i_feature < feature_num_in_model;
-					i_feature++) {
-				result.features_error[(result.num - 1)
-						* (feature_num_in_model + 1) + i_feature] =
-						combn[feature_num_in_model * index + i_feature];
-			}
-			result.features_error[(result.num - 1) * (feature_num_in_model + 1)
-					+ feature_num_in_model] = ll[index];
-
 		}
 		//fflush(out);
 	}
-}
-
-if (num != 0 && 3 == n) {
-	//printf("num = %d\n", num);
-	cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
+	if (num != 0 && 2 == n) {
+		//printf("num = %d\n", num);
+		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
 			cudaMemcpyHostToDevice);
-	InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
+		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
 			maxThreadsPerBlock, 1, 1);
-	LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-			dev_combn, num, feature_num_in_model+1, X, Y, all_valid, train,
-			training_num, test, test_num, fold, dev_ll);
-	cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
-	for (int index = 0; index < num; ++index) {
-		if (ll[index] <= ll_threshhold) {
+		LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(dev_combn,
+			num, feature_num_in_model + 1, X, Y, all_valid, train, training_num, test,
+			test_num, fold, dev_ll);
+		cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
+		for (int index = 0; index < num; ++index) {
+			if (ll[index] <= ll_threshhold) {
 
-			result.num += 1;
-			if (result.num >= result.size) {
-				result.size += 10000;
-				result.features_error = (float*) realloc(result.features_error,
+				result.num += 1;
+
+				if (result.num >= result.size) {
+					result.size += 10000;
+					result.features_error = (float*) realloc(result.features_error,
 						result.size * sizeof(float) * (feature_num_in_model + 1));
-			}
-
-			for (int i_feature = 0; i_feature < feature_num_in_model;
+				}
+				//result.feature1[result.num - 1] =  combn[index * feature_num_in_model + fixed_features_size];
+				//result.error_num[result_num - 1] = acc[index];
+				for (int i_feature = 0; i_feature < feature_num_in_model;
 					i_feature++) {
-				result.features_error[(result.num - 1)
+					result.features_error[(result.num - 1)
 						* (feature_num_in_model + 1) + i_feature] =
 						combn[feature_num_in_model * index + i_feature];
-			}
-			result.features_error[(result.num - 1) * (feature_num_in_model + 1)
+				}
+				result.features_error[(result.num - 1) * (feature_num_in_model + 1)
 					+ feature_num_in_model] = ll[index];
+
+			}
+		//fflush(out);
 		}
 	}
-	//fflush(out);
 
-}
+	if (num != 0 && 3 == n) {
+		//printf("num = %d\n", num);
+		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
+			cudaMemcpyHostToDevice);
+		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
+			maxThreadsPerBlock, 1, 1);
+		LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
+			dev_combn, num, feature_num_in_model+1, X, Y, all_valid, train,
+			training_num, test, test_num, fold, dev_ll);
+		cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
+		for (int index = 0; index < num; ++index) {
+			if (ll[index] <= ll_threshhold) {
+
+				result.num += 1;
+				if (result.num >= result.size) {
+					result.size += 10000;
+					result.features_error = (float*) realloc(result.features_error,
+						result.size * sizeof(float) * (feature_num_in_model + 1));
+				}
+
+				for (int i_feature = 0; i_feature < feature_num_in_model;
+					i_feature++) {
+					result.features_error[(result.num - 1)
+						* (feature_num_in_model + 1) + i_feature] =
+						combn[feature_num_in_model * index + i_feature];
+				}
+				result.features_error[(result.num - 1) * (feature_num_in_model + 1)
+					+ feature_num_in_model] = ll[index];
+			}
+		}
+		//fflush(out);
+
+	}
 
 }
 
