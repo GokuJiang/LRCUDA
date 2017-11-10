@@ -2078,17 +2078,19 @@ return count;
 extern "C" {
 
 SEXP TransferResultToR() {
-SEXP result_sexp;
+	SEXP result_sexp;
 
-PROTECT(result_sexp = allocVector(REALSXP, result.num * result.unit_size));
-double* result_sexp_p = REAL(result_sexp);
+	PROTECT(result_sexp = allocVector(REALSXP, result.num * result.unit_size));
+	
+	double* result_sexp_p = REAL(result_sexp);
+	
+	for (int i = 0; i < result.num * result.unit_size; i++) {
+		result_sexp_p[i] = result.features_error[i];
+		printf("result_sexp_p[%d] = %f",i,result.features_error[i])
+	}
 
-for (int i = 0; i < result.num * result.unit_size; i++) {
-	result_sexp_p[i] = result.features_error[i];
-}
-
-UNPROTECT(1);
-return (result_sexp);
+	UNPROTECT(1);
+	return (result_sexp);
 }
 
 }
@@ -2098,22 +2100,22 @@ extern "C" {
 SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold, SEXP fold,
 	SEXP device_id, SEXP start, SEXP stop) {
 
-cudaSetDevice(*INTEGER(device_id));
-cv.ll_threshhold = (*REAL(ll_threshhold));
-//printf("%f\n", cv.error_threshhold);
-cv.fold = *INTEGER(fold);
-//printf("%d\n", cv.fold);
-//printf("I am here\n");
-InitDeviceData(x, y);
+	cudaSetDevice(*INTEGER(device_id));
+	cv.ll_threshhold = (*REAL(ll_threshhold));
+	//printf("%f\n", cv.error_threshhold);
+	cv.fold = *INTEGER(fold);
+	//printf("%d\n", cv.fold);
+	//printf("I am here\n");
+	InitDeviceData(x, y);
 
-InitGridBlock(131070, 128);
-//InitGridBlock(256,64);
-//InitResult();
-n_comb = *INTEGER(num_comb);
-SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
+	InitGridBlock(131070, 128);
+	//InitGridBlock(256,64);
+	//InitResult();
+	n_comb = *INTEGER(num_comb);
+	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
 
-SEXP result = TransferResultToR();
-return result;
+	SEXP result = TransferResultToR();
+	return result;
 
 }
 
@@ -2123,27 +2125,27 @@ extern "C" {
 SEXP LRCUDAWithFixedVal(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold,
 	SEXP fold, SEXP device_id, SEXP fixed_features, SEXP nrow, SEXP ncol) {
 
-cudaSetDevice(*INTEGER(device_id));
-cv.ll_threshhold = (*REAL(ll_threshhold));
-//printf("%d\n", cv.error_threshhold);
-cv.fold = *INTEGER(fold);
-//printf("%d\n", cv.fold);
-//printf("I am here\n");
-InitDeviceData(x, y);
-//printf("I am here too\n");
-//initialize fixed feature set;
+	cudaSetDevice(*INTEGER(device_id));
+	cv.ll_threshhold = (*REAL(ll_threshhold));
+	//printf("%d\n", cv.error_threshhold);
+	cv.fold = *INTEGER(fold);
+	//printf("%d\n", cv.fold);
+	//printf("I am here\n");
+	InitDeviceData(x, y);
+	//printf("I am here too\n");
+	//initialize fixed feature set;
 
-InitFixedFeatures(fixed_features, nrow, ncol);
+	InitFixedFeatures(fixed_features, nrow, ncol);
 
-InitGridBlock(131070,128);
-//InitResult();
-n_comb = *INTEGER(num_comb);
-//printf("following n_comb \n");
+	InitGridBlock(131070,128);
+	//InitResult();
+	n_comb = *INTEGER(num_comb);
+	//printf("following n_comb \n");
 
-SearchCombnFix(n_comb);
+	SearchCombnFix(n_comb);
 
-SEXP result = TransferResultToR();
-return result;
+	SEXP result = TransferResultToR();
+	return result;
 
 }
 
@@ -2152,32 +2154,32 @@ return result;
 extern "C" {
 
 SEXP test(SEXP A, SEXP B) {
-int n = length(A);
-SEXP C;
-PROTECT(C = allocVector(REALSXP, n));
-double* ra = REAL(A);
-double* rb = REAL(B);
-double* rc = REAL(C);
+	int n = length(A);
+	SEXP C;
+	PROTECT(C = allocVector(REALSXP, n));
+	double* ra = REAL(A);
+	double* rb = REAL(B);
+	double* rc = REAL(C);
 
-for (int i = 0; i < n; i++) {
-	rc[i] = ra[i] + rb[i];
-}
+	for (int i = 0; i < n; i++) {
+		rc[i] = ra[i] + rb[i];
+	}
 
-UNPROTECT(1);
-return (C);
+	UNPROTECT(1);
+	return (C);
 }
 
 }
 
 extern "C" {
 SEXP getGPUCount() {
-int count;
-cudaGetDeviceCount(&count);
-SEXP N;
-PROTECT(N = allocVector(INTSXP, 1));
-INTEGER(N)[0] = count;
-UNPROTECT(1);
-return (N);
+	int count;
+	cudaGetDeviceCount(&count);
+	SEXP N;
+	PROTECT(N = allocVector(INTSXP, 1));
+	INTEGER(N)[0] = count;
+	UNPROTECT(1);
+	return (N);
 
 }
 }
