@@ -94,12 +94,10 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
         
         result.one <- LRCUDA(x = x, y = y, n.comb = 1, ll.threshhold = init.ll, fold = fold, device.id = device.id, cl = cl)
 
-        print(1)
         if(nrow(result.one) == 0){
                  print("use one feature can't statisfy the error threshhold")
                  return(result.l)
         }
-        print(2)
 
         ll.min.one <- min(result.one$logloss)
         
@@ -110,40 +108,32 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
             print(result.l)
             return(result.l)
         }else{
-            print(5)
-
             #save(result.one, file = "result.one.feature.RData")
         }
         
         result.l[[1]] <- result.one
-        print(6)
 
         pre.min.ll <- ll.min.one
      
 
         fixed.features <- result.one[,1]
         mode(fixed.features) <- "integer"
-        print(7)
 
         rand.index <- sample(1:length(y), length(y))    
         
-        print(8)
 
         result.two <- LRWithFixedValMG(x, y, n.comb = 1, ll.threshhold = ll.min.one, fold = fold, device.id = device.id , cl = cl, fixed.features = as.matrix(fixed.features))
-        print(9)
 
         if(nrow(result.two) == 0){
             print("use two features can't satisfy the error theshhold")
             return(result.l)
         }
              
-        print(10)
 
         ll.min.two <- min(result.two$logloss)
         if(pre.min.ll - ll.min.two <= ll.diff){
-                return(result.l)
+            return(result.l)
         }
-        print(11)
 
         result.l[[2]] <- result.two
         pre.min.ll <- ll.min.two
@@ -152,16 +142,13 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
         print(paste("logloss.min.two", ll.min.two))
      
         
-        print(12)
 
         fixed.features <- RmDupVal(result.two[,1:2])
-        print(3)
 
         mode(fixed.features) <- "integer"
         ll.para <- ll.min.two
         
         for(i in 3:10){
-            print(14)
 
                 print(paste("i = ", i))
                 print(paste("fixed features num", nrow(fixed.features)))
