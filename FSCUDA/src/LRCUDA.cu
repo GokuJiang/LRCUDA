@@ -844,7 +844,7 @@ return 0;
 }
 
 void SearchCombn(int n, long long start, long long stop) {
-
+	printf("n = %d",d);
 	int features_num = dev_matrix.np - 1;
 	int nind = dev_matrix.nind;
 	float** X = dev_matrix.dev_x;
