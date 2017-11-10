@@ -1847,7 +1847,7 @@ void InitDeviceData() {
 int nind = data_file.nrow;
 int np = data_file.ncol - 1;
 
-int i, j, k;
+int i;
 
 /*
  * alloc Y memory
@@ -2102,19 +2102,24 @@ SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold, SEXP fold,
 
 	cudaSetDevice(*INTEGER(device_id));
 	cv.ll_threshhold = (*REAL(ll_threshhold));
-	//printf("%f\n", cv.error_threshhold);
+	printf("%f\n", cv.error_threshhold);
 	cv.fold = *INTEGER(fold);
-	//printf("%d\n", cv.fold);
-	//printf("I am here\n");
+	printf("%d\n", cv.fold);
+	printf("I am here\n");
 	InitDeviceData(x, y);
 
 	InitGridBlock(131070, 128);
 	//InitGridBlock(256,64);
 	//InitResult();
+	
 	n_comb = *INTEGER(num_comb);
+	
 	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
 
+	printf("111111");
 	SEXP result = TransferResultToR();
+	printf("222222");
+
 	return result;
 
 }
