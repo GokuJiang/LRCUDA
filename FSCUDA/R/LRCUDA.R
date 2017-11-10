@@ -34,7 +34,7 @@ LRCUDA <- function(x, y, n.comb = 2, ll.threshhold , fold = 10, device.id = 0, c
     }
     
     result <- clusterApply(cl, para, LRMultipleGPU)
-    print(paste("LRCUDA result: ",result))
+
     return(combineResult(result))
     
     stopCluster(cl)
@@ -48,6 +48,7 @@ LRSingleGPU <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, devi
 }
 
 LRMultipleGPU <- function(para){
+    print(paste("param: ",para))
     x <- para$x
     y <- para$y
     n.comb <- para$n.comb
