@@ -102,6 +102,7 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
         print(2)
 
         ll.min.one <- min(result.one$logloss)
+        
         print(result.one$logloss)
 
         print(paste("logloss.min.one", ll.min.one))
