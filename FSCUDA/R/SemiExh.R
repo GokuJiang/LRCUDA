@@ -48,7 +48,7 @@ LRWithFixedValMG <- function(x, y, n.comb = 1, ll.threshhold = 0 , fold = 10, de
         }
         device.num <- length(device.id)
 
-        clusterEvalQ(cl,library(iFes))
+        clusterEvalQ(cl,library(FSCUDA))
         para <- vector("list", device.num)
         task.piece <- floor(task.num / device.num)
      
