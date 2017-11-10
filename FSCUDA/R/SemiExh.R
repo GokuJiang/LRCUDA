@@ -92,6 +92,8 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
         pre.min.ll <- init.ll
         print(paste("init log loss is ", init.ll))
         result.one <- LRCUDA(x = x, y = y, n.comb = 1, ll.threshhold = init.ll, fold = fold, device.id = device.id, cl = cl)
+        print("result.one")
+        print(result.one)
         if(nrow(result.one) == 0){
                  print("use one feature can't statisfy the error threshhold")
                  return(result.l)
