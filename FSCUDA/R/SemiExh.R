@@ -190,7 +190,6 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
                 ll.para <- ll.min
                 
         }
-        print(result.l)
         return(result.l) 
 }
 

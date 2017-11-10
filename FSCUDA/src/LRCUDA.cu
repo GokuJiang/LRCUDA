@@ -2116,7 +2116,7 @@ SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold, SEXP fold,
 	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
 
 	SEXP result = TransferResultToR();
-
+	
 	return result;
 
 }

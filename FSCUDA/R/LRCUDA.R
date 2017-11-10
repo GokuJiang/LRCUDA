@@ -1,7 +1,5 @@
 LRCUDA <- function(x, y, n.comb = 2, ll.threshhold , fold = 10, device.id = 0, cl = NULL){
-
     
-
     if(!is.matrix(x)){
         stop("x should be matrix type !")
     }
@@ -23,7 +21,6 @@ LRCUDA <- function(x, y, n.comb = 2, ll.threshhold , fold = 10, device.id = 0, c
             stop("device count should be equal to cluster size! Please check you configures.")
         }
     }
-    
 
     clusterEvalQ(cl,library(FSCUDA))
     para <- vector("list", device.num)
@@ -37,7 +34,9 @@ LRCUDA <- function(x, y, n.comb = 2, ll.threshhold , fold = 10, device.id = 0, c
     }
     
     result <- clusterApply(cl, para, LRMultipleGPU)
+    print(paste("LRCUDA result: ",result))
     return(combineResult(result))
+    
     stopCluster(cl)
 }
 
@@ -49,22 +48,23 @@ LRSingleGPU <- function(x, y, n.comb = 2, error.threshhold = 0 , fold = 10, devi
 }
 
 LRMultipleGPU <- function(para){
-     x <- para$x
-     y <- para$y
-     n.comb <- para$n.comb
-     ll.threshhold <- para$ll.threshhold
-     fold <- para$fold
-     device.id <- para$device.id
-     start <- para$start
-     stop <- para$stop
+    x <- para$x
+    y <- para$y
+    n.comb <- para$n.comb
+    ll.threshhold <- para$ll.threshhold
+    fold <- para$fold
+    device.id <- para$device.id
+    start <- para$start
+    stop <- para$stop
     print(paste("n.comb ",n.comb))
     print(paste("ll.threshhold ",ll.threshhold))
     print(paste("fold ",fold))
 
-     result <- .Call("LRCUDA", t(x), y, as.integer(n.comb), as.numeric(ll.threshhold), as.integer(fold), as.integer(device.id), as.integer(start), as.integer(stop))
+    result <- .Call("LRCUDA", t(x), y, as.integer(n.comb), as.numeric(ll.threshhold), as.integer(fold), as.integer(device.id), as.integer(start), as.integer(stop))
+    
     print(paste("result ",result))
 
-     return(t(matrix(result, nrow = n.comb + 1)))
+    return(t(matrix(result, nrow = n.comb + 1)))
      
 }
 
