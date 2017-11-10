@@ -25,7 +25,7 @@ LRCUDA <- function(x, y, n.comb = 2, ll.threshhold , fold = 10, device.id = 0, c
     }
     
 
-    clusterEvalQ(cl,library(iFes))
+    clusterEvalQ(cl,library(FSCUDA))
     para <- vector("list", device.num)
     task.piece <- floor(task.num / device.num)	
 
