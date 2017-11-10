@@ -2084,7 +2084,9 @@ SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold, SEXP fold,
 	
 	n_comb = *INTEGER(num_comb);
 	
+	printf("1111111111111");
 	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
+	printf("2222222222222");
 
 	SEXP result = TransferResultToR();
 	
