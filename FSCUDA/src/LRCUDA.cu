@@ -2086,7 +2086,7 @@ SEXP TransferResultToR() {
 	
 	for (int i = 0; i < result.num * result.unit_size; i++) {
 		result_sexp_p[i] = result.features_error[i];
-		printf("result_sexp_p[%d] = %f",i,result.features_error[i])
+		printf("result_sexp_p[%d] = %f",i,result.features_error[i]);
 	}
 
 	UNPROTECT(1);
