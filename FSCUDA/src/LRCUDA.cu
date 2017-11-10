@@ -2086,7 +2086,6 @@ SEXP TransferResultToR() {
 	
 	for (int i = 0; i < result.num * result.unit_size; i++) {
 		result_sexp_p[i] = result.features_error[i];
-		printf("result_sexp_p[%d] = %f\n",i,result.features_error[i]);
 	}
 
 	UNPROTECT(1);
@@ -2117,7 +2116,6 @@ SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold, SEXP fold,
 	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
 
 	SEXP result = TransferResultToR();
-	printf("222222");
 
 	return result;
 
