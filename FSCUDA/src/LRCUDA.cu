@@ -844,7 +844,6 @@ return 0;
 }
 
 void SearchCombn(int n, long long start, long long stop) {
-	printf("n = %d",n);
 	int features_num = dev_matrix.np - 1;
 	int nind = dev_matrix.nind;
 	float** X = dev_matrix.dev_x;
@@ -893,13 +892,13 @@ void SearchCombn(int n, long long start, long long stop) {
 			counter++;
 			if (counter < start) continue;
 			if (counter > stop) break;
-			
+			printf("num=%d\n",num);
 			if (num < num_combn) {
 				combn[num * n] = i;
 				num++;
 			} else {
-				//printf("finish combn 1 features, start exe in GPU.\n");
-				//printf("i = %d,num = %d\n", i, num);
+				printf("finish combn 1 features, start exe in GPU.\n");
+				printf("i = %d,num = %d\n", i, num);
 				cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,
 						cudaMemcpyHostToDevice);
 
@@ -934,10 +933,12 @@ void SearchCombn(int n, long long start, long long stop) {
 
 				}
 				//fflush(out);
-
+				
 				for (int h = 0; h < num_combn; h++) {
 					ll[h] = 0.0;
 				}
+				printf("123456789");
+				
 				cudaMemcpy(dev_ll, ll, sizeof(float) * num_combn,
 					cudaMemcpyHostToDevice);
 
@@ -949,7 +950,7 @@ void SearchCombn(int n, long long start, long long stop) {
 
 		}
 		if (num != 0) {
-			//printf("num = %d\n", num);
+			printf("num = %d\n", num);
 			cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,
 				cudaMemcpyHostToDevice);
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
@@ -975,8 +976,7 @@ void SearchCombn(int n, long long start, long long stop) {
 						result.features_error[(result.num - 1) * (n + 1) + i_feature] =
 							combn[n * index + i_feature];
 					}
-					result.features_error[(result.num - 1) * (n + 1) + n] =
-						ll[index];
+					result.features_error[(result.num - 1) * (n + 1) + n] = ll[index];
 				}
 			}
 			//fflush(out);
