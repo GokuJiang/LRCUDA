@@ -108,7 +108,7 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
         result.l[[1]] <- result.one
         pre.min.ll <- ll.min.one
      
- 
+        
         fixed.features <- result.one[,1]
         mode(fixed.features) <- "integer"
         rand.index <- sample(1:length(y), length(y))    
@@ -164,6 +164,7 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
                 ll.para <- ll.min
                 
         }
+        print(result.l)
         return(result.l) 
 }
 

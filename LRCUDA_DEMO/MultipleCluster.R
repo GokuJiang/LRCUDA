@@ -33,4 +33,3 @@ y <- lapply(y,function(i) binaryzation(i))
 y <- as.numeric(unlist(y))
 
 result <- iFes(x, y)
-print(result)
