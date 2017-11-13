@@ -533,134 +533,127 @@ __device__ void fitLMNWithCV(int* dev_combn, int valid_num, int np, float** X,
 	float* Y, int all_valid, int** train, int training_num, int** test,
 	int test_num, int fold, float* ll) {
 
-//int tid = threadIdx.x + blockIdx.x * blockDim.x;
-int tid = gridDim.x * blockDim.x * blockIdx.y + blockIdx.x * blockDim.x
-		+ threadIdx.x;
+	//int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	int tid = gridDim.x * blockDim.x * blockIdx.y + blockIdx.x * blockDim.x + threadIdx.x;
 
-int nind = training_num;
+	int nind = training_num;
 
-if (tid >= valid_num) {
-	return;
-}
-
-int features[ATTR_NUM];
-features[0] = 0;
-
-/*
- * add fixed features into the model.
- */
-for (int i = 0; i < np - 1; i++) {
-	features[i + 1] = dev_combn[tid * (np - 1) + i];
-}
-
-/*
- * change np to np + fixed_features_num_dev.
- */
-//np = fixed_features_num_dev + np;
-__syncthreads();
-
-float coef[ATTR_NUM];
-initArrayATTR(coef);
-
-//float S[ATTR_NUM][ATTR_NUM];
-//initMatrixATTRATTR(S);
-float p[INST_NUM];
-initArrayINST(p);
-
-///////////////////////////////////////
-
-// Newton-Raphson to fit logistic model
-
-int converge = 0;
-int it = 0;   //  迭代的次数
-
-float T[ATTR_NUM][ATTR_NUM];
-//			float T_T[ATTR_NUM][ATTR_NUM];
-
-float ncoef[ATTR_NUM];
-
-while (!converge && it < 20) {
-
-	for (int i = 0; i < nind; i++) { //nind 训练集的个数
-		float t = 0;
-		for (int j = 0; j < np; j++) {  //np 变量个数
-
-			t += coef[j] * X[train[fold][i]][features[j]];
-
-		}
-		p[i] = 1 / (1 + expf(-t)); //p[i] = 1 / (1 + exp(-t))
-
-	}
-
-	initMatrixATTRATTR(T);
-
-	for (int j = 0; j < np; j++)
-		for (int k = j; k < np; k++) {
-			float sum = 0;
-			for (int i = 0; i < nind; i++) {
-				sum += X[train[fold][i]][features[j]] * (p[i] * (1 - p[i]))
-						* X[train[fold][i]][features[k]];
-
-			}
-			T[j][k] = T[k][j] = sum;
-		}
-
-	int flag = 1;
-
-//				initMatrixATTRATTR(T_T);
-	svd_inverse(T, &flag, np);
-
-	if (!flag) {
-		all_valid = 0;
+	if (tid >= valid_num) {
 		return;
 	}
+
+	int features[ATTR_NUM];
+	features[0] = 0;
+
+	/*
+	 * add fixed features into the model.
+	 */
+	for (int i = 0; i < np - 1; i++) {
+		features[i + 1] = dev_combn[tid * (np - 1) + i];
+	}
+
+	/*
+	 * change np to np + fixed_features_num_dev.
+	 */
 	__syncthreads();
 
-	initArrayATTR(ncoef);
+	float coef[ATTR_NUM];
+	initArrayATTR(coef);
 
-	// note implicit transpose of X
-	for (int i = 0; i < np; i++)
-		for (int j = 0; j < nind; j++)
-			for (int k = 0; k < np; k++) {
+	float p[INST_NUM];
+	initArrayINST(p);
 
-				ncoef[i] += (T[i][k] * X[train[fold][j]][features[k]])
-						* (Y[train[fold][j]] - p[j]);
+	///////////////////////////////////////
+
+	// Newton-Raphson to fit logistic model
+
+	int converge = 0;
+	int it = 0;   //  迭代的次数
+
+	float T[ATTR_NUM][ATTR_NUM];
+
+	float ncoef[ATTR_NUM];
+
+	while (!converge && it < 20) {
+
+		for (int i = 0; i < nind; i++) { //nind 训练集的个数
+			float t = 0;
+			for (int j = 0; j < np; j++) {  //np 变量个数
+
+				t += coef[j] * X[train[fold][i]][features[j]];
+
+			}
+			p[i] = 1 / (1 + expf(-t)); //p[i] = 1 / (1 + exp(-t))
+
+		}
+
+		initMatrixATTRATTR(T);
+
+		for (int j = 0; j < np; j++)
+			for (int k = j; k < np; k++) {
+				float sum = 0;
+				for (int i = 0; i < nind; i++) {
+					sum += X[train[fold][i]][features[j]] * (p[i] * (1 - p[i]))
+							* X[train[fold][i]][features[k]];
+
+				}
+				T[j][k] = T[k][j] = sum;
 			}
 
-	// Update coefficients, and check for
-	// convergence4
-	float delta = 0;
-	for (int j = 0; j < np; j++) {
-		delta += fabs(ncoef[j]);
-		coef[j] += ncoef[j];
+		int flag = 1;
+
+	//				initMatrixATTRATTR(T_T);
+		svd_inverse(T, &flag, np);
+
+		if (!flag) {
+			all_valid = 0;
+			return;
+		}
+		__syncthreads();
+
+		initArrayATTR(ncoef);
+
+		// note implicit transpose of X
+		for (int i = 0; i < np; i++)
+			for (int j = 0; j < nind; j++)
+				for (int k = 0; k < np; k++) {
+
+					ncoef[i] += (T[i][k] * X[train[fold][j]][features[k]])
+							* (Y[train[fold][j]] - p[j]);
+				}
+
+		// Update coefficients, and check for
+		// convergence4
+		float delta = 0;
+		for (int j = 0; j < np; j++) {
+			delta += fabs(ncoef[j]);
+			coef[j] += ncoef[j];
+		}
+
+		if (delta < 1e-6)  converge = 1;
+
+		// Next iteration
+		it++;
+		__syncthreads();
+
 	}
 
-	if (delta < 1e-6)
-		converge = 1;
-
-	// Next iteration
-	it++;
-	__syncthreads();
-
-}
-
-//int correct = 0;
-float loss = 0.0;
-for (int i = 0; i < test_num; ++i) {
-	float t = 0;
-	for (int j = 0; j < np; ++j) {
-		t += coef[j] * X[test[fold][i]][features[j]];
+	//int correct = 0;
+	float loss = 0.0;
+	for (int i = 0; i < test_num; ++i) {
+		float t = 0;
+		for (int j = 0; j < np; ++j) {
+			t += coef[j] * X[test[fold][i]][features[j]];
+		}
+		
+		loss += logloss(t, Y[test[fold][i]]);
+		print("loss = %lf",loss);
 	}
-	//if ((t > 0 && Y[test[fold][i]] == 1.0)
-	//		|| (t < 0 && Y[test[fold][i]] == 0.0)) {
-	//	correct++;
-	//}
-	loss += logloss(t, Y[test[fold][i]]);
-}
 
 
-ll[tid] += loss;
-
+	ll[tid] += loss;
+	print("ll[%d] = %lf",tid,ll[tid]);
+	
 }
 
 __device__ void fitLMN(int* dev_combn, int valid_num, int np, float** X,
@@ -865,7 +858,6 @@ void SearchCombn(int n, long long start, long long stop) {
 			counter++;
 			if (counter < start) continue;
 			if (counter > stop) break;
-			printf("num=%d\n",num);
 			if (num < num_combn) {
 				combn[num * n] = i;
 				num++;
