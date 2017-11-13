@@ -855,10 +855,6 @@ void SearchCombn(int n, long long start, long long stop) {
 	cudaMalloc((void**) &dev_ll, sizeof(float) * num_combn);
 	cudaMemcpy(dev_ll, ll, sizeof(float) * num_combn, cudaMemcpyHostToDevice);
 
-	//char output_file_name[MAXSTR] = "output.csv";
-
-	//FILE *out = fopen(output_file_name,"w");
-
 	InitResult(n + 1);
 
 	long long counter = 0;
@@ -887,13 +883,9 @@ void SearchCombn(int n, long long start, long long stop) {
 					cudaMemcpyDeviceToHost);
 				for (int index = 0; index < num; ++index) {
 					if (ll[index] <= ll_threshhold) {
-						//fprintf(out,"%d,%d\n", combn[index * n],acc[index]);
-
 						result.num += 1;
 						if (result.num >= result.size) {
 							result.size += 10000;
-							//result.feature1 = (int*)realloc(result.feature1, result.size*sizeof(int));
-							//result.error_num = (int*)realloc(result.error_num, result.size*sizeof(int));
 							result.features_error = (float*) realloc(
 									result.features_error,
 									result.size * sizeof(float) * (n + 1));
@@ -909,12 +901,10 @@ void SearchCombn(int n, long long start, long long stop) {
 					}
 
 				}
-				//fflush(out);
 				
 				for (int h = 0; h < num_combn; h++) {
 					ll[h] = 0.0;
 				}
-				printf("123456789");
 				
 				cudaMemcpy(dev_ll, ll, sizeof(float) * num_combn,
 					cudaMemcpyHostToDevice);
@@ -1130,8 +1120,6 @@ void SearchCombn(int n, long long start, long long stop) {
 					result.num += 1;
 					if (result.num >= result.size) {
 						result.size += 10000;
-						//result.feature1 = (int*)realloc(result.feature1, result.size*sizeof(int));
-						//result.error_num = (int*)realloc(result.error_num, result.size*sizeof(int));
 						result.features_error = (float*) realloc(
 							result.features_error,
 							result.size * sizeof(float) * (n + 1));
@@ -1143,442 +1131,373 @@ void SearchCombn(int n, long long start, long long stop) {
 					result.features_error[(result.num - 1) * (n + 1) + n] = ll[index];
 				}
 			}
-			//fflush(out);
-
 		}
 
 	} else {
 		//printf("%d combination is not supported now.\n", n);
 		return;
 	}
-	//fclose(out);
 
 }
 
 void InitFixedFeatures(SEXP fixed_features_sexp, SEXP nrow, SEXP ncol) {
 
-fixed_features_size = *INTEGER(ncol);
-//test
-//printf("%d\n", fixed_features_size);
-
-fixed_features_set_size = *INTEGER(nrow);
-//test
-//printf("%d\n", fixed_features_set_size);
-//test
-//printf("%d\n", length(fixed_features_sexp));
-
-fixed_features_set = (int*) malloc(sizeof(int) * length(fixed_features_sexp));
-
-int* fixed_p = INTEGER(fixed_features_sexp);
-
-for (int i = 0; i < length(fixed_features_sexp); i++) {
-	fixed_features_set[i] = fixed_p[i];
+	fixed_features_size = *INTEGER(ncol);
 	//test
-	//printf("%d ", fixed_features_set[i]);
-}
-//printf("\n");
+	//printf("%d\n", fixed_features_size);
+
+	fixed_features_set_size = *INTEGER(nrow);
+	//test
+	//printf("%d\n", fixed_features_set_size);
+	//test
+	//printf("%d\n", length(fixed_features_sexp));
+
+	fixed_features_set = (int*) malloc(sizeof(int) * length(fixed_features_sexp));
+
+	int* fixed_p = INTEGER(fixed_features_sexp);
+
+	for (int i = 0; i < length(fixed_features_sexp); i++) {
+		fixed_features_set[i] = fixed_p[i];
+		//test
+		//printf("%d ", fixed_features_set[i]);
+	}
+	//printf("\n");
 
 }
 
 void SearchCombnFix(int n) {
 
-int features_num = dev_matrix.np - 1;   // exclude X0
-int nind = dev_matrix.nind;
-float** X = dev_matrix.dev_x;
-float* Y = dev_matrix.dev_y;
-int all_valid = 1;
-int** train = cv.dev_train;
-int** test = cv.dev_test;
-int* training_num = cv.dev_train_num;
-int* test_num = cv.dev_test_num;
-int fold = cv.fold;
-//int error_threshhold = cv.error_threshhold;
+	int features_num = dev_matrix.np - 1;   // exclude X0
+	int nind = dev_matrix.nind;
+	float **X = dev_matrix.dev_x;
+	float *Y = dev_matrix.dev_y;
+	int all_valid = 1;
+	int **train = cv.dev_train;
+	int **test = cv.dev_test;
+	int *training_num = cv.dev_train_num;
+	int *test_num = cv.dev_test_num;
+	int fold = cv.fold;
+	//int error_threshhold = cv.error_threshhold;
 
-float ll_threshhold = cv.ll_threshhold;
+	float ll_threshhold = cv.ll_threshhold;
 
-int* dev_combn;
-float* dev_ll;  // device log loss
+	int *dev_combn;
+	float *dev_ll;  // device log loss
 
 
-/*
- * following two variable should be configured automatically based on GPU performance.
- */
+	/*
+	 * following two variable should be configured automatically based on GPU performance.
+	 */
 
-int num_combn = maxThreadsPerBlock * maxBlocksPerGrid;
-//int *combn = (int*)malloc(sizeof(int)*n*num_combn);
+	int num_combn = maxThreadsPerBlock * maxBlocksPerGrid;
+	//int *combn = (int*)malloc(sizeof(int)*n*num_combn);
 
-int feature_num_in_model = n + fixed_features_size; // exclude x0
-int *combn = (int*) malloc(sizeof(int) * feature_num_in_model * num_combn);
-int num = 0;
-cudaMalloc((void**) &dev_combn, sizeof(int) * feature_num_in_model * num_combn);
+	int feature_num_in_model = n + fixed_features_size; // exclude x0
+	int *combn = (int *) malloc(sizeof(int) * feature_num_in_model * num_combn);
+	int num = 0;
+	cudaMalloc((void **) &dev_combn, sizeof(int) * feature_num_in_model * num_combn);
 
-float *ll = (float*) malloc(sizeof(float) * num_combn);
-for (int h = 0; h < num_combn; h++) {
-	ll[h] = 0.0;
-}
+	float *ll = (float *) malloc(sizeof(float) * num_combn);
 
-cudaMalloc((void**) &dev_ll, sizeof(float) * num_combn);
-cudaMemcpy(dev_ll, ll, sizeof(float) * num_combn, cudaMemcpyHostToDevice);
+	for (int h = 0; h < num_combn; h++) {
+			ll[h] = 0.0;
+	}
 
-//char output_file_name[MAXSTR] = "output.csv";
+	cudaMalloc((void **) &dev_ll, sizeof(float) * num_combn);
+	cudaMemcpy(dev_ll, ll, sizeof(float) * num_combn, cudaMemcpyHostToDevice);
 
-//FILE *out = fopen(output_file_name,"w");
+	//char output_file_name[MAXSTR] = "output.csv";
 
-InitResult(feature_num_in_model + 1);  // +1 mean error_num column
+	//FILE *out = fopen(output_file_name,"w");
 
-for (int i_set = 0; i_set < fixed_features_set_size; i_set++) {
-	//printf("fixed_features_set_size = %d\n", fixed_features_set_size);
-	if (1 == n) {
-		//test
-		//printf("1 == n features_num = %d\n", features_num);
-		for (int i = 1; i <= features_num; i++) {
-			if (IsInFixedFeatures(i, i_set)) {
-				//test
-				//printf("continue i = %d\n", i);
-				continue;
-			}
+	InitResult(feature_num_in_model + 1);  // +1 mean error_num column
 
-			if (num < num_combn) {
-				//test
-				//printf("num < num_combn\n");
-				for (int i_fixed_feature = 0;
-						i_fixed_feature < fixed_features_size;
-						++i_fixed_feature) {
-					combn[num * feature_num_in_model + i_fixed_feature] =
-							fixed_features_set[i_set * fixed_features_size
-									+ i_fixed_feature];
+	for (int i_set = 0; i_set < fixed_features_set_size; i_set++) {
+			//printf("fixed_features_set_size = %d\n", fixed_features_set_size);
+			if (1 == n) {
 					//test
-					//printf("%d ", combn[num*feature_num_in_model + i_fixed_feature]);
+					//printf("1 == n features_num = %d\n", features_num);
+					for (int i = 1; i <= features_num; i++) {
+							if (IsInFixedFeatures(i, i_set)) continue;
+
+
+							if (num < num_combn) {
+									for (int i_fixed_feature = 0; i_fixed_feature < fixed_features_size; ++i_fixed_feature) {
+											combn[num * feature_num_in_model + i_fixed_feature] = fixed_features_set[
+															i_set * fixed_features_size + i_fixed_feature];
+									}
+									combn[num * feature_num_in_model + fixed_features_size] = i;
+									//printf("%d ", combn[num * feature_num_in_model + fixed_features_size]);
+
+									//printf("\n");
+									num++;
+							} else {
+									//printf("finish combn 1 features, start exe in GPU.\n");
+									//printf("i = %d,num = %d\n", i, num);
+									cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
+														 cudaMemcpyHostToDevice);
+
+									InitThreadConfig(maxBlocksPerGrid, 1, 1, maxThreadsPerBlock, 1, 1);
+									LRNCV << < thread_config.dim_grid, thread_config.dim_block >> >
+																										 (dev_combn, num, feature_num_in_model +
+																																			1, X, Y, all_valid, train, training_num, test, test_num, fold, dev_ll);
+									cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
+									for (int index = 0; index < num; ++index) {
+											if (ll[index] <= ll_threshhold) {
+													result.num += 1;
+													if (result.num >= result.size) {
+															result.size += 10000;
+															result.features_error = (float *) realloc(result.features_error,
+																																				result.size * sizeof(float) *
+																																				(feature_num_in_model + 1));
+													}
+
+													for (int i_feature = 0; i_feature < feature_num_in_model; i_feature++) {
+															int feature_index = (result.num - 1) * (feature_num_in_model + 1) + i_feature;
+															int comb_index = feature_num_in_model * index + i_feature;
+															result.features_error[feature_index] = combn[comb_index];
+													}
+													int feature_error_index =
+																	(result.num - 1) * (feature_num_in_model + 1) + feature_num_in_model;
+													result.features_error[feature_error_index] = ll[index];
+
+											}
+
+									}
+									//fflush(out);
+
+									for (int h = 0; h < num_combn; h++) {
+											ll[h] = 0.0;
+									}
+									cudaMemcpy(dev_ll, ll, sizeof(float) * num_combn,
+														 cudaMemcpyHostToDevice);
+
+									num = 0;
+
+									//combn[num * n] = i;
+									for (int i_fixed_feature = 0;
+											 i_fixed_feature < fixed_features_size;
+											 ++i_fixed_feature) {
+											combn[num * feature_num_in_model + i_fixed_feature] =
+															fixed_features_set[i_set * fixed_features_size
+																								 + i_fixed_feature];
+									}
+									combn[num * feature_num_in_model + fixed_features_size] = i;
+
+									num++;
+
+							}
+
+					}
+
+			} else if (2 == n) {
+					for (int i = 1; i <= features_num; i++) {
+							for (int j = i + 1; j <= features_num; j++) {
+
+									if (IsInFixedFeatures(i, i_set)
+											|| IsInFixedFeatures(j, i_set)) {
+											continue;
+									}
+
+									if (num < num_combn) {
+											for (int i_fixed_feature = 0;
+													 i_fixed_feature < fixed_features_size;
+													 ++i_fixed_feature) {
+													combn[num * feature_num_in_model + i_fixed_feature] =
+																	fixed_features_set[i_set * fixed_features_size
+																										 + i_fixed_feature];
+											}
+											combn[num * feature_num_in_model + fixed_features_size] = i;
+											combn[num * feature_num_in_model + fixed_features_size + 1] =
+															j;
+											num++;
+
+									} else {
+											//printf("finish combn 2 features, start exe in GPU.\n");
+											//printf("i = %d,j = %d, num = %d\n", i, j,num);
+											cudaMemcpy(dev_combn, combn,
+																 sizeof(int) * fixed_features_size * num_combn,
+																 cudaMemcpyHostToDevice);
+
+											InitThreadConfig(maxBlocksPerGrid, 1, 1, maxThreadsPerBlock,
+																			 1, 1);
+											LRNCV << < thread_config.dim_grid, thread_config.dim_block >> > (
+															dev_combn, num, fixed_features_size + 1, X, Y,
+																			all_valid, train, training_num, test, test_num,
+																			fold, dev_ll);
+											cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn,
+																 cudaMemcpyDeviceToHost);
+											for (int index = 0; index < num; ++index) {
+													if (ll[index] <= ll_threshhold) {
+															result.num += 1;
+															if (result.num >= result.size) {
+																	result.size += 10000;
+																	result.features_error = (float *) realloc(
+																					result.features_error,
+																					result.size * sizeof(float)
+																					* (feature_num_in_model + 1));
+															}
+															//result.feature1[result.num - 1] =  combn[index * feature_num_in_model + fixed_features_size];
+															//result.error_num[result_num - 1] = acc[index];
+															for (int i_feature = 0;
+																	 i_feature < feature_num_in_model;
+																	 i_feature++) {
+																	result.features_error[(result.num - 1)
+																												* (feature_num_in_model + 1) + i_feature] =
+																					combn[feature_num_in_model * index
+																								+ i_feature];
+															}
+															result.features_error[(result.num - 1)
+																										* (feature_num_in_model + 1)
+																										+ feature_num_in_model] = ll[index];
+
+													}
+
+											}
+											//fflush(out);
+
+											for (int h = 0; h < num_combn; h++) {
+													ll[h] = 0.0;
+											}
+											cudaMemcpy(dev_ll, ll, sizeof(float) * num_combn,
+																 cudaMemcpyHostToDevice);
+
+											num = 0;
+											for (int i_fixed_feature = 0;
+													 i_fixed_feature < fixed_features_size;
+													 ++i_fixed_feature) {
+													combn[num * feature_num_in_model + i_fixed_feature] =
+																	fixed_features_set[i_set * fixed_features_size
+																										 + i_fixed_feature];
+											}
+											combn[num * feature_num_in_model + fixed_features_size] = i;
+											combn[num * feature_num_in_model + fixed_features_size + 1] =
+															j;
+
+											num++;
+
+									}
+							}
+
+					}
+
+			} else if (3 == n) {
+
+				for (int i = 1; i <= features_num; i++) {
+					for (int j = i + 1; j <= features_num; j++) {
+						for (int k = j + 1; k <= features_num; k++) {
+							if (IsInFixedFeatures(i, i_set) || IsInFixedFeatures(j, i_set) || IsInFixedFeatures(k,i_set)) continue;
+							
+
+							if (num < num_combn) {
+								for (int i_fixed_feature = 0; i_fixed_feature < fixed_features_size; ++i_fixed_feature) {
+										int combn_index = num * feature_num_in_model + i_fixed_feature;
+										int fixed_index = i_set * fixed_features_size + i_fixed_feature;
+										combn[combn_index] = fixed_features_set[fixed_index];
+								}
+								combn[num * feature_num_in_model + fixed_features_size] = i;
+								combn[num * feature_num_in_model + fixed_features_size + 1] = j;
+								combn[num * feature_num_in_model + fixed_features_size + 2] = k;
+								num++;
+							} else {
+								
+								cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn, cudaMemcpyHostToDevice);
+
+								InitThreadConfig(maxBlocksPerGrid, 1, 1, maxThreadsPerBlock, 1, 1);
+								LRNCV << < thread_config.dim_grid, thread_config.dim_block >> > (dev_combn, num, n + 1, X, Y, all_valid, train, training_num, test, test_num, fold, dev_ll);
+								cudaMemcpy(ll, dev_ll, sizeof(int) * num_combn,cudaMemcpyDeviceToHost);
+								for (int index = 0; index < num; ++index) {
+									if (ll[index] <= ll_threshhold) {
+
+										result.num += 1;
+										if (result.num >= result.size) {
+											result.size += 10000;
+											result.features_error = (float *) realloc(result.features_error,result.size * sizeof(float) *(feature_num_in_model + 1));
+										}
+
+										for (int i_feature = 0; i_feature < feature_num_in_model; i_feature++) {
+												int error_index = (result.num - 1) * (feature_num_in_model + 1) + i_feature;
+												int comb_index = feature_num_in_model * index + i_feature;
+												result.features_error[error_index] = combn[comb_index];
+										}
+										result.features_error[(result.num - 1) * (feature_num_in_model + 1) + feature_num_in_model] = ll[index];
+									}
+								}
+								//fflush(out);
+
+								for (int h = 0; h < num_combn; h++) {
+										ll[h] = 0.0;
+								}
+								cudaMemcpy(dev_ll, ll, sizeof(int) * num_combn,
+													 cudaMemcpyHostToDevice);
+
+								num = 0;
+								for (int i_fixed_feature = 0;
+										 i_fixed_feature < fixed_features_size;
+										 ++i_fixed_feature) {
+										combn[num * feature_num_in_model + i_fixed_feature] =
+														fixed_features_set[i_set
+																							 * fixed_features_size
+																							 + i_fixed_feature];
+								}
+								combn[num * feature_num_in_model + fixed_features_size] =
+												i;
+								combn[num * feature_num_in_model + fixed_features_size
+											+ 1] = j;
+								combn[num * feature_num_in_model + fixed_features_size
+											+ 2] = k;
+								num++;
+								num++;
+
+							}
+						}
+					}
 				}
-				combn[num * feature_num_in_model + fixed_features_size] = i;
-				//printf("%d ", combn[num * feature_num_in_model + fixed_features_size]);
-				//test
-				//printf("\n");
-				num++;
+
 			} else {
-				//printf("finish combn 1 features, start exe in GPU.\n");
-				//printf("i = %d,num = %d\n", i, num);
-				cudaMemcpy(dev_combn, combn,
-						sizeof(int) * feature_num_in_model * num_combn,
-						cudaMemcpyHostToDevice);
-
-				InitThreadConfig(maxBlocksPerGrid, 1, 1, maxThreadsPerBlock, 1,
-						1);
-				LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-						dev_combn, num, feature_num_in_model + 1, X, Y, all_valid,
-						train, training_num, test, test_num, fold, dev_ll);
-				cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn,
-						cudaMemcpyDeviceToHost);
-				for (int index = 0; index < num; ++index) {
-					if (ll[index] <= ll_threshhold) {
-						result.num += 1;
-						if (result.num >= result.size) {
-							result.size += 10000;
-							//result.feature1 = (int*)realloc(result.feature1, result.size*sizeof(int));
-							//result.error_num = (int*)realloc(result.error_num, result.size*sizeof(int));
-							result.features_error = (float*) realloc(
-									result.features_error,
-									result.size * sizeof(float)
-											* (feature_num_in_model + 1));
-						}
-						//result.feature1[result.num - 1] =  combn[index * feature_num_in_model + fixed_features_size];
-						//result.error_num[result_num - 1] = acc[index];
-						for (int i_feature = 0;
-								i_feature < feature_num_in_model; i_feature++) {
-							result.features_error[(result.num - 1)
-									* (feature_num_in_model + 1) + i_feature] =
-									combn[feature_num_in_model * index
-											+ i_feature];
-						}
-						result.features_error[(result.num - 1)
-								* (feature_num_in_model + 1)
-								+ feature_num_in_model] = ll[index];
-
-					}
-
-				}
-				//fflush(out);
-
-				for (int h = 0; h < num_combn; h++) {
-					ll[h] = 0.0;
-				}
-				cudaMemcpy(dev_ll, ll, sizeof(float) * num_combn,
-						cudaMemcpyHostToDevice);
-
-				num = 0;
-
-				//combn[num * n] = i;
-				for (int i_fixed_feature = 0;
-						i_fixed_feature < fixed_features_size;
-						++i_fixed_feature) {
-					combn[num * feature_num_in_model + i_fixed_feature] =
-							fixed_features_set[i_set * fixed_features_size
-									+ i_fixed_feature];
-				}
-				combn[num * feature_num_in_model + fixed_features_size] = i;
-
-				num++;
-
+					//printf("%d combination is not supported now.\n", n);
+					return;
 			}
-
-		}
-
-	} else if (2 == n) {
-		for (int i = 1; i <= features_num; i++) {
-			for (int j = i + 1; j <= features_num; j++) {
-
-				if (IsInFixedFeatures(i, i_set)
-						|| IsInFixedFeatures(j, i_set)) {
-					continue;
-				}
-
-				if (num < num_combn) {
-					for (int i_fixed_feature = 0;
-							i_fixed_feature < fixed_features_size;
-							++i_fixed_feature) {
-						combn[num * feature_num_in_model + i_fixed_feature] =
-								fixed_features_set[i_set * fixed_features_size
-										+ i_fixed_feature];
-					}
-					combn[num * feature_num_in_model + fixed_features_size] = i;
-					combn[num * feature_num_in_model + fixed_features_size + 1] =
-							j;
-					num++;
-
-				} else {
-					//printf("finish combn 2 features, start exe in GPU.\n");
-					//printf("i = %d,j = %d, num = %d\n", i, j,num);
-					cudaMemcpy(dev_combn, combn,
-							sizeof(int) * fixed_features_size * num_combn,
-							cudaMemcpyHostToDevice);
-
-					InitThreadConfig(maxBlocksPerGrid, 1, 1, maxThreadsPerBlock,
-							1, 1);
-					LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-							dev_combn, num, fixed_features_size + 1, X, Y,
-							all_valid, train, training_num, test, test_num,
-							fold, dev_ll);
-					cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn,
-							cudaMemcpyDeviceToHost);
-					for (int index = 0; index < num; ++index) {
-						if (ll[index] <= ll_threshhold) {
-							result.num += 1;
-							if (result.num >= result.size) {
-								result.size += 10000;
-								result.features_error = (float*) realloc(
-										result.features_error,
-										result.size * sizeof(float)
-												* (feature_num_in_model + 1));
-							}
-							//result.feature1[result.num - 1] =  combn[index * feature_num_in_model + fixed_features_size];
-							//result.error_num[result_num - 1] = acc[index];
-							for (int i_feature = 0;
-									i_feature < feature_num_in_model;
-									i_feature++) {
-								result.features_error[(result.num - 1)
-										* (feature_num_in_model + 1) + i_feature] =
-										combn[feature_num_in_model * index
-												+ i_feature];
-							}
-							result.features_error[(result.num - 1)
-									* (feature_num_in_model + 1)
-									+ feature_num_in_model] = ll[index];
-
-						}
-
-					}
-					//fflush(out);
-
-					for (int h = 0; h < num_combn; h++) {
-						ll[h] = 0.0;
-					}
-					cudaMemcpy(dev_ll, ll, sizeof(float) * num_combn,
-							cudaMemcpyHostToDevice);
-
-					num = 0;
-					for (int i_fixed_feature = 0;
-							i_fixed_feature < fixed_features_size;
-							++i_fixed_feature) {
-						combn[num * feature_num_in_model + i_fixed_feature] =
-								fixed_features_set[i_set * fixed_features_size
-										+ i_fixed_feature];
-					}
-					combn[num * feature_num_in_model + fixed_features_size] = i;
-					combn[num * feature_num_in_model + fixed_features_size + 1] =
-							j;
-
-					num++;
-
-				}
-			}
-
-		}
-
-	} else if (3 == n) {
-
-		for (int i = 1; i <= features_num; i++) {
-			for (int j = i + 1; j <= features_num; j++) {
-				for (int k = j + 1; k <= features_num; k++) {
-					if (IsInFixedFeatures(i, i_set)
-							|| IsInFixedFeatures(j, i_set)
-							|| IsInFixedFeatures(k, i_set)) {
-						continue;
-					}
-
-					if (num < num_combn) {
-						for (int i_fixed_feature = 0;
-								i_fixed_feature < fixed_features_size;
-								++i_fixed_feature) {
-							combn[num * feature_num_in_model + i_fixed_feature] =
-									fixed_features_set[i_set
-											* fixed_features_size
-											+ i_fixed_feature];
-						}
-						combn[num * feature_num_in_model + fixed_features_size] =
-								i;
-						combn[num * feature_num_in_model + fixed_features_size
-								+ 1] = j;
-						combn[num * feature_num_in_model + fixed_features_size
-								+ 2] = k;
-						num++;
-					} else {
-						//printf("finish combn 3 features, start exe in GPU.\n");
-						//printf("i = %d,j = %d, k = %d, num = %d\n", i, j, k,
-						//			num);
-						cudaMemcpy(dev_combn, combn,
-								sizeof(int) * n * num_combn,
-								cudaMemcpyHostToDevice);
-
-						InitThreadConfig(maxBlocksPerGrid, 1, 1,
-								maxThreadsPerBlock, 1, 1);
-						LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-								dev_combn, num, n+1, X, Y,
-								all_valid, train, training_num, test, test_num,
-								fold, dev_ll);
-						cudaMemcpy(ll, dev_ll, sizeof(int) * num_combn,
-								cudaMemcpyDeviceToHost);
-						for (int index = 0; index < num; ++index) {
-							if (ll[index] <= ll_threshhold) {
-								//fprintf(out,"%d,%d,%d,%d\n", combn[index * n],
-								//	combn[index * n + 1], combn[index * n + 2],
-								//	acc[index]);
-
-								result.num += 1;
-								if (result.num >= result.size) {
-									result.size += 10000;
-									result.features_error =
-											(float*) realloc(
-													result.features_error,
-													result.size * sizeof(float)
-															* (feature_num_in_model
-																	+ 1));
-								}
-
-								for (int i_feature = 0;
-										i_feature < feature_num_in_model;
-										i_feature++) {
-									result.features_error[(result.num - 1)
-											* (feature_num_in_model + 1)
-											+ i_feature] =
-											combn[feature_num_in_model * index
-													+ i_feature];
-								}
-								result.features_error[(result.num - 1)
-										* (feature_num_in_model + 1)
-										+ feature_num_in_model] = ll[index];
-
-							}
-						}
-						//fflush(out);
-
-						for (int h = 0; h < num_combn; h++) {
-							ll[h] = 0.0;
-						}
-						cudaMemcpy(dev_ll, ll, sizeof(int) * num_combn,
-								cudaMemcpyHostToDevice);
-
-						num = 0;
-						for (int i_fixed_feature = 0;
-								i_fixed_feature < fixed_features_size;
-								++i_fixed_feature) {
-							combn[num * feature_num_in_model + i_fixed_feature] =
-									fixed_features_set[i_set
-											* fixed_features_size
-											+ i_fixed_feature];
-						}
-						combn[num * feature_num_in_model + fixed_features_size] =
-								i;
-						combn[num * feature_num_in_model + fixed_features_size
-								+ 1] = j;
-						combn[num * feature_num_in_model + fixed_features_size
-								+ 2] = k;
-						num++;
-						num++;
-
-					}
-				}
-			}
-		}
-
-		} else {
-			//printf("%d combination is not supported now.\n", n);
-			return;
-		}
 	}
 
 	if (num != 0 & 1 == n) {
 
-	
-		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
-			cudaMemcpyHostToDevice);
-		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
-			maxThreadsPerBlock, 1, 1);
-	
-		LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(dev_combn,
-			num, feature_num_in_model + 1, X, Y, all_valid, train, training_num, test,
-			test_num, fold, dev_ll);
-	//test
-	
+
+		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn, cudaMemcpyHostToDevice);
+		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1, maxThreadsPerBlock, 1, 1);
+
+		LRNCV << < thread_config.dim_grid, thread_config.dim_block >> > (dev_combn, num, feature_num_in_model + 1, X, Y, all_valid, train, training_num, test, test_num, fold, dev_ll);
+
 		cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
 		for (int index = 0; index < num; ++index) {
-	
-			if (ll[index] <= ll_threshhold) {
-			//fprintf(out,"%d,%d\n", combn[index * n],acc[index]);
-			//printf("acc : %d\n", acc[index]);
-				result.num += 1;
-				if (result.num >= result.size) {
-					result.size += 10000;
-					result.features_error = (float*) realloc(result.features_error,
-						result.size * sizeof(float) * (feature_num_in_model + 1));
-				}
 
-				for (int i_feature = 0; i_feature < feature_num_in_model;
-					i_feature++) {
-					result.features_error[(result.num - 1)
-						* (feature_num_in_model + 1) + i_feature] =
-						combn[feature_num_in_model * index + i_feature];
-				//test
-				//printf("%d ", result.features_error[(result.num - 1)*(feature_num_in_model + 1) + i_feature]);
-				}
+				if (ll[index] <= ll_threshhold) {
+						
+					result.num += 1;
+					if (result.num >= result.size) {
+						result.size += 10000;
+						result.features_error = (float *) realloc(result.features_error,result.size * sizeof(float) * (feature_num_in_model + 1));
+					}
 
-				result.features_error[(result.num - 1) * (feature_num_in_model + 1)
-					+ feature_num_in_model] = ll[index];
-				//test
-				//printf("%d ", result.features_error[(result.num - 1)*(feature_num_in_model + 1) + feature_num_in_model]);
-				//printf("\n");
-			}
+					for (int i_feature = 0; i_feature < feature_num_in_model; i_feature++) {
+						result.features_error[(result.num - 1) * (feature_num_in_model + 1) + i_feature] = combn[feature_num_in_model * index + i_feature];		
+					}
+
+					result.features_error[(result.num - 1) * (feature_num_in_model + 1) + feature_num_in_model] = ll[index];
+					
+				}
 		}
 		//fflush(out);
 	}
 	if (num != 0 && 2 == n) {
 		//printf("num = %d\n", num);
 		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
-			cudaMemcpyHostToDevice);
+							 cudaMemcpyHostToDevice);
 		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
-			maxThreadsPerBlock, 1, 1);
-		LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(dev_combn,
-			num, feature_num_in_model + 1, X, Y, all_valid, train, training_num, test,
-			test_num, fold, dev_ll);
+										 maxThreadsPerBlock, 1, 1);
+		LRNCV << < thread_config.dim_grid, thread_config.dim_block >> > (dev_combn,
+						num, feature_num_in_model + 1, X, Y, all_valid, train, training_num, test,
+						test_num, fold, dev_ll);
 		cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
 		for (int index = 0; index < num; ++index) {
 			if (ll[index] <= ll_threshhold) {
@@ -1586,55 +1505,50 @@ for (int i_set = 0; i_set < fixed_features_set_size; i_set++) {
 				result.num += 1;
 
 				if (result.num >= result.size) {
-					result.size += 10000;
-					result.features_error = (float*) realloc(result.features_error,
-						result.size * sizeof(float) * (feature_num_in_model + 1));
+						result.size += 10000;
+						result.features_error = (float *) realloc(result.features_error,
+																											result.size * sizeof(float) * (feature_num_in_model + 1));
 				}
 				//result.feature1[result.num - 1] =  combn[index * feature_num_in_model + fixed_features_size];
 				//result.error_num[result_num - 1] = acc[index];
 				for (int i_feature = 0; i_feature < feature_num_in_model;
-					i_feature++) {
-					result.features_error[(result.num - 1)
-						* (feature_num_in_model + 1) + i_feature] =
-						combn[feature_num_in_model * index + i_feature];
+						 i_feature++) {
+						result.features_error[(result.num - 1)
+																	* (feature_num_in_model + 1) + i_feature] =
+										combn[feature_num_in_model * index + i_feature];
 				}
 				result.features_error[(result.num - 1) * (feature_num_in_model + 1)
-					+ feature_num_in_model] = ll[index];
+															+ feature_num_in_model] = ll[index];
 
 			}
-		//fflush(out);
+			//fflush(out);
 		}
 	}
 
 	if (num != 0 && 3 == n) {
 		//printf("num = %d\n", num);
 		cudaMemcpy(dev_combn, combn, sizeof(int) * feature_num_in_model * num_combn,
-			cudaMemcpyHostToDevice);
+							 cudaMemcpyHostToDevice);
 		InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
-			maxThreadsPerBlock, 1, 1);
-		LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
-			dev_combn, num, feature_num_in_model+1, X, Y, all_valid, train,
-			training_num, test, test_num, fold, dev_ll);
+										 maxThreadsPerBlock, 1, 1);
+		LRNCV << < thread_config.dim_grid, thread_config.dim_block >> > (
+						dev_combn, num, feature_num_in_model + 1, X, Y, all_valid, train,
+						training_num, test, test_num, fold, dev_ll);
 		cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn, cudaMemcpyDeviceToHost);
 		for (int index = 0; index < num; ++index) {
-			if (ll[index] <= ll_threshhold) {
+				if (ll[index] <= ll_threshhold) {
 
-				result.num += 1;
-				if (result.num >= result.size) {
-					result.size += 10000;
-					result.features_error = (float*) realloc(result.features_error,
-						result.size * sizeof(float) * (feature_num_in_model + 1));
-				}
+					result.num += 1;
+					if (result.num >= result.size) {
+						result.size += 10000;
+						result.features_error = (float *) realloc(result.features_error, result.size * sizeof(float) * (feature_num_in_model + 1));
+						}
 
-				for (int i_feature = 0; i_feature < feature_num_in_model;
-					i_feature++) {
-					result.features_error[(result.num - 1)
-						* (feature_num_in_model + 1) + i_feature] =
-						combn[feature_num_in_model * index + i_feature];
+						for (int i_feature = 0; i_feature < feature_num_in_model; i_feature++) {
+							result.features_error[(result.num - 1) * (feature_num_in_model + 1) + i_feature] = combn[feature_num_in_model * index + i_feature];
+						}
+						result.features_error[(result.num - 1) * (feature_num_in_model + 1) + feature_num_in_model] = ll[index];
 				}
-				result.features_error[(result.num - 1) * (feature_num_in_model + 1)
-					+ feature_num_in_model] = ll[index];
-			}
 		}
 		//fflush(out);
 
@@ -1643,383 +1557,281 @@ for (int i_set = 0; i_set < fixed_features_set_size; i_set++) {
 }
 
 float* predict(float** test, int nind, int np, float* coef) {
-int i, j;
-float* lable = (float*) malloc(nind * sizeof(float));
+	int i, j;
+	float* lable = (float*) malloc(nind * sizeof(float));
 
-for (i = 0; i < nind; ++i) {
-	float t = 0;
-	for (j = 0; j < np; ++j) {
-		t += coef[j] * test[i][j];
-	}
-	lable[i] = t;
-}
-return lable;
+	for (i = 0; i < nind; ++i) {
+		float t = 0;
+		for (j = 0; j < np; ++j) {
+			t += coef[j] * test[i][j];
+		}
+		lable[i] = t;
+	}	
+	return lable;
 }
 
 void InitCrossValidation(float* y, int nind, int fold) {
 
-int lable_one_num = 0;
-int lable_zero_num = 0;
-int *train_num = (int*) malloc(sizeof(int) * fold);
-int *test_num = (int*) malloc(sizeof(int) * fold);
+	int lable_one_num = 0;
+	int lable_zero_num = 0;
+	int *train_num = (int*) malloc(sizeof(int) * fold);
+	int *test_num = (int*) malloc(sizeof(int) * fold);
 
-int* lable_one = (int*) malloc(sizeof(int) * nind);
-int* lable_zero = (int*) malloc(sizeof(int) * nind);
+	int* lable_one = (int*) malloc(sizeof(int) * nind);
+	int* lable_zero = (int*) malloc(sizeof(int) * nind);
 
-for (int i = 0; i < nind; i++) {
-	if ((int) y[i] == 0) {
-		lable_one[lable_one_num] = i;
-		lable_one_num++;
-	} else {
-		lable_zero[lable_zero_num] = i;
-		lable_zero_num++;
-	}
-}
-int lable_one_block = lable_one_num / fold;
-int lable_one_left = lable_one_num % fold;
-int lable_zero_block = lable_zero_num / fold;
-int lable_zero_left = lable_zero_num % fold;
-
-int** train = (int**) malloc(sizeof(int*) * fold);
-for (int i = 0; i < fold; i++) {
-	train[i] = (int*) malloc(sizeof(int) * nind);
-}
-
-int** test = (int**) malloc(sizeof(int*) * fold);
-for (int i = 0; i < fold; i++) {
-	test[i] = (int*) malloc(sizeof(int) * nind);
-}
-
-for (int i = 0; i < fold; i++) {
-	// test
-	test_num[i] = 0;
-	for (int j = lable_one_block * i; j < lable_one_block * (i + 1); j++) {
-		test[i][test_num[i]] = lable_one[j];
-		test_num[i]++;
-	}
-	if (i < lable_one_left) {
-		test[i][test_num[i]] = lable_one[fold * lable_one_block + i];
-		test_num[i]++;
-	}
-
-	for (int j = lable_zero_block * i; j < lable_zero_block * (i + 1); j++) {
-		test[i][test_num[i]] = lable_zero[j];
-		test_num[i]++;
-	}
-	if (i < lable_zero_left) {
-		test[i][test_num[i]] = lable_zero[fold * lable_zero_block + i];
-		test_num[i]++;
-	}
-
-	//train
-	train_num[i] = 0;
-	for (int j = 0; j < lable_one_num; j++) {
-		if ((j >= lable_one_block * i & j < lable_one_block * (i + 1))
-				|| j == fold * lable_one_block + i) {
-			continue;
+	for (int i = 0; i < nind; i++) {
+		if ((int) y[i] == 0) {
+			lable_one[lable_one_num] = i;
+			lable_one_num++;
 		} else {
-			train[i][train_num[i]] = lable_one[j];
-			train_num[i]++;
+			lable_zero[lable_zero_num] = i;
+			lable_zero_num++;
 		}
 	}
-	for (int j = 0; j < lable_zero_num; j++) {
-		if ((j >= lable_zero_block * i & j < lable_zero_block * (i + 1))
+	int lable_one_block = lable_one_num / fold;
+	int lable_one_left = lable_one_num % fold;
+	int lable_zero_block = lable_zero_num / fold;
+	int lable_zero_left = lable_zero_num % fold;
+
+	int** train = (int**) malloc(sizeof(int*) * fold);
+	for (int i = 0; i < fold; i++) {
+		train[i] = (int*) malloc(sizeof(int) * nind);
+	}
+
+	int** test = (int**) malloc(sizeof(int*) * fold);
+	for (int i = 0; i < fold; i++) {
+		test[i] = (int*) malloc(sizeof(int) * nind);
+	}
+
+	for (int i = 0; i < fold; i++) {
+		// test
+		test_num[i] = 0;
+		for (int j = lable_one_block * i; j < lable_one_block * (i + 1); j++) {
+			test[i][test_num[i]] = lable_one[j];
+			test_num[i]++;
+		}
+		if (i < lable_one_left) {
+			test[i][test_num[i]] = lable_one[fold * lable_one_block + i];
+			test_num[i]++;
+		}
+
+		for (int j = lable_zero_block * i; j < lable_zero_block * (i + 1); j++) {
+			test[i][test_num[i]] = lable_zero[j];
+			test_num[i]++;
+		}
+		if (i < lable_zero_left) {
+			test[i][test_num[i]] = lable_zero[fold * lable_zero_block + i];
+			test_num[i]++;
+		}
+
+		//train
+		train_num[i] = 0;
+		for (int j = 0; j < lable_one_num; j++) {
+			if ((j >= lable_one_block * i & j < lable_one_block * (i + 1)) || j == fold * lable_one_block + i) {
+				continue;
+			} else {
+				train[i][train_num[i]] = lable_one[j];
+				train_num[i]++;
+			}
+		}
+		for (int j = 0; j < lable_zero_num; j++) {
+			if ((j >= lable_zero_block * i & j < lable_zero_block * (i + 1))
 				|| j == fold * lable_zero_block + i) {
-			continue;
-		} else {
-			train[i][train_num[i]] = lable_zero[j];
-			train_num[i]++;
+				continue;
+			} else {
+				train[i][train_num[i]] = lable_zero[j];
+				train_num[i]++;
+			}
 		}
+
 	}
 
-}
-
-int** dev_test_h = (int**) malloc(sizeof(int*) * fold);
-for (int i = 0; i < fold; i++) {
-	cudaMalloc((void**) &dev_test_h[i], nind * sizeof(int));
-	cudaMemcpy(dev_test_h[i], test[i], sizeof(int) * nind,
+	int** dev_test_h = (int**) malloc(sizeof(int*) * fold);
+	for (int i = 0; i < fold; i++) {
+		cudaMalloc((void**) &dev_test_h[i], nind * sizeof(int));
+		cudaMemcpy(dev_test_h[i], test[i], sizeof(int) * nind,
 			cudaMemcpyHostToDevice);
-}
-int** dev_test;
-cudaMalloc((void**) &dev_test, fold * sizeof(int*));
-cudaMemcpy(dev_test, dev_test_h, sizeof(int*) * fold, cudaMemcpyHostToDevice);
+	}
+	int** dev_test;
+	cudaMalloc((void**) &dev_test, fold * sizeof(int*));
+	cudaMemcpy(dev_test, dev_test_h, sizeof(int*) * fold, cudaMemcpyHostToDevice);
 
-int** dev_train_h = (int**) malloc(sizeof(int*) * fold);
-for (int i = 0; i < fold; i++) {
-	cudaMalloc((void**) &dev_train_h[i], nind * sizeof(int));
-	cudaMemcpy(dev_train_h[i], train[i], sizeof(int) * nind,
+	int** dev_train_h = (int**) malloc(sizeof(int*) * fold);
+	for (int i = 0; i < fold; i++) {
+		cudaMalloc((void**) &dev_train_h[i], nind * sizeof(int));
+		cudaMemcpy(dev_train_h[i], train[i], sizeof(int) * nind,
 			cudaMemcpyHostToDevice);
-}
-int** dev_train;
-cudaMalloc((void**) &dev_train, fold * sizeof(int*));
-cudaMemcpy(dev_train, dev_train_h, sizeof(int*) * fold, cudaMemcpyHostToDevice);
+	}
+	int** dev_train;
+	cudaMalloc((void**) &dev_train, fold * sizeof(int*));
+	cudaMemcpy(dev_train, dev_train_h, sizeof(int*) * fold, cudaMemcpyHostToDevice);
 
-int* dev_train_num;
-cudaMalloc((void**) &dev_train_num, sizeof(int) * fold);
-cudaMemcpy(dev_train_num, train_num, sizeof(int) * fold,
+	int* dev_train_num;
+	cudaMalloc((void**) &dev_train_num, sizeof(int) * fold);
+	cudaMemcpy(dev_train_num, train_num, sizeof(int) * fold,
 		cudaMemcpyHostToDevice);
 
-int* dev_test_num;
-cudaMalloc((void**) &dev_test_num, sizeof(int) * fold);
-cudaMemcpy(dev_test_num, test_num, sizeof(int) * fold, cudaMemcpyHostToDevice);
+	int* dev_test_num;
+	cudaMalloc((void**) &dev_test_num, sizeof(int) * fold);
+	cudaMemcpy(dev_test_num, test_num, sizeof(int) * fold, cudaMemcpyHostToDevice);
 
-cv.dev_train = dev_train;
-cv.dev_test = dev_test;
-cv.dev_train_num = dev_train_num;
-cv.dev_test_num = dev_test_num;
-cv.fold = fold;
-cv.dev_train_h = dev_train_h;
-cv.dev_test_h = dev_test_h;
-
-//	// test
-//	for(int i = 0; i < fold; i ++){
-//		printf("fold %d\n", i);
-//		printf("train num %d\n", train_num[i]);
-//		for(int j = 0; j < train_num[i]; j ++){
-//			printf("%d,", train[i][j]);
-//		}
-//		printf("\n");
-//		printf("test num %d\n", test_num[i]);
-//		for(int j = 0; j < test_num[i]; j++) {
-//			printf("%d,", test[i][j]);
-//		}
-//		printf("\n");
-//
-//	}
-
+	cv.dev_train = dev_train;
+	cv.dev_test = dev_test;
+	cv.dev_train_num = dev_train_num;
+	cv.dev_test_num = dev_test_num;
+	cv.fold = fold;
+	cv.dev_train_h = dev_train_h;
+	cv.dev_test_h = dev_test_h;
 }
 
 void InitDeviceData() {
-int nind = data_file.nrow;
-int np = data_file.ncol - 1;
+	int nind = data_file.nrow;
+	int np = data_file.ncol - 1;
 
-int i;
+	int i;
 
-/*
- * alloc Y memory
- */
+	/*
+	 * alloc Y memory
+	 */
 
-float* Y = (float*) malloc(nind * sizeof(float));
+	float* Y = (float*) malloc(nind * sizeof(float));
 
-/*
- * init Y memory.
- */
+	/*
+	 * init Y memory.
+	 */
 
-for (i = 0; i < nind; i++) {
-	Y[i] = matrix[i][np];
-}
+	for (i = 0; i < nind; i++) {
+		Y[i] = matrix[i][np];
+	}
 
-/*
- * initialize cross validation
- */
-InitCrossValidation(Y, nind, cv.fold);
+	/*
+	 * initialize cross validation
+	 */
+	InitCrossValidation(Y, nind, cv.fold);
 
-/*
- * alloc X memory in device
- */
-float** dev_x_h = (float**) malloc(sizeof(float*) * nind);
-for (int i = 0; i < nind; ++i) {
-	cudaMalloc((void**) &dev_x_h[i], np * sizeof(float));
-	//printf("%d:%lx\n",i,dev_x_h[i]);
-	cudaMemcpy(dev_x_h[i], matrix[i], sizeof(float) * np,
-			cudaMemcpyHostToDevice);
-}
-float** dev_x;
-cudaMalloc((void**) &dev_x, nind * sizeof(float*));
-cudaMemcpy(dev_x, dev_x_h, sizeof(float*) * nind, cudaMemcpyHostToDevice);
-/*
- * alloc Y memory in device.
- */
+	/*
+	 * alloc X memory in device
+	 */
+	float** dev_x_h = (float**) malloc(sizeof(float*) * nind);
+	for (int i = 0; i < nind; ++i) {
+		cudaMalloc((void**) &dev_x_h[i], np * sizeof(float));
+		//printf("%d:%lx\n",i,dev_x_h[i]);
+		cudaMemcpy(dev_x_h[i], matrix[i], sizeof(float) * np,
+				cudaMemcpyHostToDevice);
+	}
+	float** dev_x;
+	cudaMalloc((void**) &dev_x, nind * sizeof(float*));
+	cudaMemcpy(dev_x, dev_x_h, sizeof(float*) * nind, cudaMemcpyHostToDevice);
+	
+	/*
+	 * alloc Y memory in device.
+	 */
+	float* dev_y;
+	cudaMalloc((void**) &dev_y, nind * sizeof(float));
+	cudaMemcpy(dev_y, Y, sizeof(float) * nind, cudaMemcpyHostToDevice);
 
-float* dev_y;
-cudaMalloc((void**) &dev_y, nind * sizeof(float));
-cudaMemcpy(dev_y, Y, sizeof(float) * nind, cudaMemcpyHostToDevice);
+	dev_matrix.dev_x = dev_x;
+	dev_matrix.dev_y = dev_y;
+	dev_matrix.nind = nind;
+	dev_matrix.np = np;
+	dev_matrix.dev_x_h = dev_x_h;
 
-dev_matrix.dev_x = dev_x;
-dev_matrix.dev_y = dev_y;
-dev_matrix.nind = nind;
-dev_matrix.np = np;
-dev_matrix.dev_x_h = dev_x_h;
-
-free(Y);
+	free(Y);
 
 }
 
 //x0 should be include in x.
 extern "C" {
-SEXP InitDeviceData(SEXP x, SEXP y) {
-int nind = length(y);
-int np = length(x) / nind;
-double* rx = (double*) REAL(x);
-double* ry = (double*) REAL(y);
+	SEXP InitDeviceData(SEXP x, SEXP y) {
+		int nind = length(y);
+		int np = length(x) / nind;
+		double* rx = (double*) REAL(x);
+		double* ry = (double*) REAL(y);
 
-/*
- * Store the data into a float array.
- */
-float* rx_float = (float*) malloc(sizeof(float) * length(x));
-for (int i = 0; i < length(x); i++) {
-	rx_float[i] = rx[i];
-}
-float* ry_float = (float*) malloc(sizeof(float) * length(y));
-for (int i = 0; i < length(y); i++) {
-	ry_float[i] = ry[i];
-}
+		/*
+		 * Store the data into a float array.
+		 */
+		float* rx_float = (float*) malloc(sizeof(float) * length(x));
+		for (int i = 0; i < length(x); i++) {
+			rx_float[i] = rx[i];
+		}
+		float* ry_float = (float*) malloc(sizeof(float) * length(y));
+		for (int i = 0; i < length(y); i++) {
+			ry_float[i] = ry[i];
+		}
 
-InitCrossValidation(ry_float, nind, cv.fold);
+		InitCrossValidation(ry_float, nind, cv.fold);
 
-/*
- * alloc X memory in device
- */
+		/*
+		 * alloc X memory in device
+		 */
 
-float** dev_x_h = (float**) malloc(sizeof(float*) * nind);
-for (int i = 0; i < nind; ++i) {
-	cudaMalloc((void**) &dev_x_h[i], np * sizeof(float));
-	//printf("%d:%lx\n",i,dev_x_h[i]);
-	cudaMemcpy(dev_x_h[i], rx_float + np * i, sizeof(float) * np,
-			cudaMemcpyHostToDevice);
-}
-float** dev_x;
-cudaMalloc((void**) &dev_x, nind * sizeof(float*));
-cudaMemcpy(dev_x, dev_x_h, sizeof(float*) * nind, cudaMemcpyHostToDevice);
+		float** dev_x_h = (float**) malloc(sizeof(float*) * nind);
+		for (int i = 0; i < nind; ++i) {
+			cudaMalloc((void**) &dev_x_h[i], np * sizeof(float));
+			//printf("%d:%lx\n",i,dev_x_h[i]);
+			cudaMemcpy(dev_x_h[i], rx_float + np * i, sizeof(float) * np,
+					cudaMemcpyHostToDevice);
+		}
+		float** dev_x;
+		cudaMalloc((void**) &dev_x, nind * sizeof(float*));
+		cudaMemcpy(dev_x, dev_x_h, sizeof(float*) * nind, cudaMemcpyHostToDevice);
 
-/*
- * alloc Y memory in device.
- */
+		/*
+		 * alloc Y memory in device.
+		 */
 
-float* dev_y;
-cudaMalloc((void**) &dev_y, nind * sizeof(float));
-cudaMemcpy(dev_y, ry_float, sizeof(float) * nind, cudaMemcpyHostToDevice);
+		float* dev_y;
+		cudaMalloc((void**) &dev_y, nind * sizeof(float));
+		cudaMemcpy(dev_y, ry_float, sizeof(float) * nind, cudaMemcpyHostToDevice);
 
-dev_matrix.dev_x = dev_x;
-dev_matrix.dev_y = dev_y;
-dev_matrix.nind = nind;
-dev_matrix.np = np;
-dev_matrix.dev_x_h = dev_x_h;
+		dev_matrix.dev_x = dev_x;
+		dev_matrix.dev_y = dev_y;
+		dev_matrix.nind = nind;
+		dev_matrix.np = np;
+		dev_matrix.dev_x_h = dev_x_h;
 
-/*
- * unit test x
- */
-/*
- float* x_test = (float*)malloc(sizeof(float)*np);
- for(int i = 0; i <nind; ++i){
- cudaMemcpy(x_test, dev_x_h[i], np*sizeof(float), cudaMemcpyDeviceToHost);
- for(int j = 0; j < np ; ++ j){
- printf("%f ", x_test[j]);
- }
- printf("\n");
- }
- */
-
-/*
- * unit test y
- */
-/*
- float* y_test = (float*)malloc(sizeof(float)*nind);
- cudaMemcpy(y_test, dev_y, nind*sizeof(float), cudaMemcpyDeviceToHost);
- for(int i = 0; i < nind; ++ i){
- printf("%f ", y_test[i]);
- }
- printf("\n");
- */
-free(rx_float);
-free(ry_float);
-return R_NilValue;
-}
+		free(rx_float);
+		free(ry_float);
+		return R_NilValue;
+	}
 }
 
 void FreeAll() {
-int nind = data_file.nrow;
+	int nind = data_file.nrow;
 
-//	cudaFree(dev_coef);
-//	free(lable);
-//	free(coef);
+	for (int i = 0; i < cv.fold; i++) {
+		cudaFree(cv.dev_test_h[i]);
+		cudaFree(cv.dev_train_h[i]);
+	}
+	free(cv.dev_test_h);
+	free(cv.dev_train_h);
+	cudaFree(cv.dev_test);
+	cudaFree(cv.dev_train);
 
-for (int i = 0; i < cv.fold; i++) {
-	cudaFree(cv.dev_test_h[i]);
-	cudaFree(cv.dev_train_h[i]);
-}
-free(cv.dev_test_h);
-free(cv.dev_train_h);
-cudaFree(cv.dev_test);
-cudaFree(cv.dev_train);
+	for (int i = 0; i < nind; i++) {
+		free(matrix[i]);
+		cudaFree(dev_matrix.dev_x_h[i]);
+	}
+	cudaFree(dev_matrix.dev_x);
+	free(dev_matrix.dev_x_h);
+	cudaFree(dev_matrix.dev_y);
+	free(matrix);
 
-for (int i = 0; i < nind; i++) {
-	free(matrix[i]);
-	cudaFree(dev_matrix.dev_x_h[i]);
-}
-cudaFree(dev_matrix.dev_x);
-free(dev_matrix.dev_x_h);
-cudaFree(dev_matrix.dev_y);
-free(matrix);
-
-/*
- * free cross validation data
- */
+	/*
+	 * free cross validation data
+	 */
 
 }
 
 int GetDeviceCount() {
-int count;
-cudaGetDeviceCount(&count);
-return count;
+	int count;
+	cudaGetDeviceCount(&count);
+	return count;
 }
 
-//int main(int argc, char* argv[]){
-//
-//	/*
-//	 * argv[1]:file name
-//	 * argv[2]:row numbers of data matrix
-//	 * argv[3]:column number of data matrix
-//	 * argv[4]:1,2,3 way search
-//	 * argv[5]:eroror theshhold
-//	 * argv[6] fold
-//	 * argv[7] device id
-//	 * argv[8] task start index
-//	 * argv[9] task stop index
-//	 *
-//	 * a command example
-//	 * "/home/qinghan/workspace/cuda_lr/data/512_t_statistics.csv" 40 514 2 40 10 0 1 100
-//	 */
-//
-//	float start_time, stop_time;
-//	start_time = clock();
-//
-//	strcpy(data_file.name,argv[1]);
-//    data_file.nrow = atoi(argv[2]);
-//    data_file.ncol = atoi(argv[3]);
-//    int n_comb = atoi(argv[4]);
-//    cv.error_threshhold = atoi(argv[5]);
-//    cv.fold = atoi(argv[6]);
-//
-//    int device_id = atoi(argv[7]);
-//    long long start = atoll(argv[8]);
-//    long long stop = atoll(argv[9]);
-//
-//    InitGridBlock(256,65535);
-//    //InitFixedFeatures();
-//    cudaSetDevice(device_id);
-//
-//    matrix = read_csv(data_file.name, data_file.nrow, data_file.ncol);
-//
-//    InitDeviceData();
-//
-//    SearchCombn(n_comb, start, stop);
-//
-//    //test result
-//    for(int i = 0; i < result.num; i ++){
-//    	printf("%d,%d\n", result.feature1[i], result.error_num[i]);
-//    }
-//
-//    cudaError_t err;
-//    err = cudaGetLastError();
-//    printf("error = %s \n", cudaGetErrorString(err));
-//
-//	FreeAll();
-//
-//	stop = clock();
-//	printf("Execution time is %f seconds\n", (stop_time - start_time) / (float)CLOCKS_PER_SEC);
-//
-//}
+
 
 extern "C" {
 
@@ -2042,95 +1854,91 @@ SEXP TransferResultToR() {
 
 extern "C" {
 
-SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold, SEXP fold,
-	SEXP device_id, SEXP start, SEXP stop) {
-	
-	cudaSetDevice(*INTEGER(device_id));
-	cv.ll_threshhold = (*REAL(ll_threshhold));
-	printf("%f\n", cv.error_threshhold);
-	cv.fold = *INTEGER(fold);
-	printf("%d\n", cv.fold);
-	printf("I am here %d\n",num_comb);
-	InitDeviceData(x, y);
+	SEXP LRCUDA(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold, SEXP fold,
+		SEXP device_id, SEXP start, SEXP stop) {
+		
+		cudaSetDevice(*INTEGER(device_id));
+		
+		cv.ll_threshhold = (*REAL(ll_threshhold));
 
-	InitGridBlock(131070, 128);
-	//InitGridBlock(256,64);
-	//InitResult();
-	
-	n_comb = *INTEGER(num_comb);
-	
-	printf("1111111111111");
-	SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
-	printf("2222222222222");
+		cv.fold = *INTEGER(fold);
 
-	SEXP result = TransferResultToR();
-	
-	return result;
+		InitDeviceData(x, y);
 
-}
+		InitGridBlock(131070, 128);
+		//InitGridBlock(256,64);
+		//InitResult();
+		
+		n_comb = *INTEGER(num_comb);
+		
+		SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
 
-}
+		SEXP result = c();
+		
+		return result;
 
-extern "C" {
-SEXP LRCUDAWithFixedVal(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold,
-	SEXP fold, SEXP device_id, SEXP fixed_features, SEXP nrow, SEXP ncol) {
-
-	cudaSetDevice(*INTEGER(device_id));
-	cv.ll_threshhold = (*REAL(ll_threshhold));
-	//printf("%d\n", cv.error_threshhold);
-	cv.fold = *INTEGER(fold);
-	//printf("%d\n", cv.fold);
-	//printf("I am here\n");
-	InitDeviceData(x, y);
-	//printf("I am here too\n");
-	//initialize fixed feature set;
-
-	InitFixedFeatures(fixed_features, nrow, ncol);
-
-	InitGridBlock(131070,128);
-	//InitResult();
-	n_comb = *INTEGER(num_comb);
-	//printf("following n_comb \n");
-
-	SearchCombnFix(n_comb);
-
-	SEXP result = TransferResultToR();
-	return result;
-
-}
-
-}
-
-extern "C" {
-
-SEXP test(SEXP A, SEXP B) {
-	int n = length(A);
-	SEXP C;
-	PROTECT(C = allocVector(REALSXP, n));
-	double* ra = REAL(A);
-	double* rb = REAL(B);
-	double* rc = REAL(C);
-
-	for (int i = 0; i < n; i++) {
-		rc[i] = ra[i] + rb[i];
 	}
 
-	UNPROTECT(1);
-	return (C);
 }
+
+extern "C" {
+	SEXP LRCUDAWithFixedVal(SEXP x, SEXP y, SEXP num_comb, SEXP ll_threshhold,
+		SEXP fold, SEXP device_id, SEXP fixed_features, SEXP nrow, SEXP ncol) {
+
+		cudaSetDevice(*INTEGER(device_id));
+		cv.ll_threshhold = (*REAL(ll_threshhold));
+
+		cv.fold = *INTEGER(fold);
+
+
+		InitDeviceData(x, y);
+		
+
+		InitFixedFeatures(fixed_features, nrow, ncol);
+
+		InitGridBlock(131070,128);
+
+		n_comb = *INTEGER(num_comb);
+
+		SearchCombnFix(n_comb);
+
+		SEXP result = TransferResultToR();
+		return result;
+
+	}
+	
+}
+
+extern "C" {
+
+	SEXP test(SEXP A, SEXP B) {
+		int n = length(A);
+		SEXP C;
+		PROTECT(C = allocVector(REALSXP, n));
+		double* ra = REAL(A);
+		double* rb = REAL(B);
+		double* rc = REAL(C);
+
+		for (int i = 0; i < n; i++) {
+			rc[i] = ra[i] + rb[i];
+		}
+
+		UNPROTECT(1);
+		return (C);
+	}
 
 }
 
 extern "C" {
-SEXP getGPUCount() {
-	int count;
-	cudaGetDeviceCount(&count);
-	SEXP N;
-	PROTECT(N = allocVector(INTSXP, 1));
-	INTEGER(N)[0] = count;
-	UNPROTECT(1);
-	return (N);
+	SEXP getGPUCount() {
+		int count;
+		cudaGetDeviceCount(&count);
+		SEXP N;
+		PROTECT(N = allocVector(INTSXP, 1));
+		INTEGER(N)[0] = count;
+		UNPROTECT(1);
+		return (N);
 
-}
+	}
 }
 
