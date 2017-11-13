@@ -854,7 +854,7 @@ void SearchCombn(int n, long long start, long long stop) {
 	long long counter = 0;
 
 	if (1 == n) {
-		printf("1024");
+//		printf("1024");
 		for (int i = 1; i <= features_num; i++) {
 
 			counter++;
@@ -915,17 +915,18 @@ void SearchCombn(int n, long long start, long long stop) {
 		if (num != 0) {
 			cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,
 				cudaMemcpyHostToDevice);
-			printf("11111\n");
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
 				maxThreadsPerBlock, 1, 1);
 			LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
 				dev_combn, num, n+1, X, Y, all_valid, train,
 				training_num, test, test_num, fold, dev_ll);
-			printf("22222\n");
 
 			cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn,
 				cudaMemcpyDeviceToHost);
+			printf("11111\n");
+
 			for (int index = 0; index < num; ++index) {
+				printf("22222\nll[%d]=%f\n",index,ll[index]);
 				if (ll[index] <= ll_threshhold) {
 					result.num += 1;
 					if (result.num >= result.size) {
@@ -939,6 +940,7 @@ void SearchCombn(int n, long long start, long long stop) {
 						result.features_error[(result.num - 1) * (n + 1) + i_feature] =
 							combn[n * index + i_feature];
 					}
+					
 					result.features_error[(result.num - 1) * (n + 1) + n] = ll[index];
 				}
 			}
