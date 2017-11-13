@@ -32,7 +32,7 @@ y <- colon[1,2:column.n]
 y <- lapply(y,function(i) binaryzation(i))
 y <- as.numeric(unlist(y))
 
-result <- iFes(x, y, 2)
+result <- iFes(x, y, 1)
 
 write.csv(result, file = "Result.csv",row.names=FALSE)
 

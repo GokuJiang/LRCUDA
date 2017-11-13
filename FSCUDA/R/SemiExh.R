@@ -51,13 +51,13 @@ LRWithFixedValMG <- function(x, y, n.comb = 1, ll.threshhold = 0 , fold = 10, de
         clusterEvalQ(cl,library(FSCUDA))
         para <- vector("list", device.num)
         task.piece <- floor(task.num / device.num)
-     
+        print(paste("device.num",device.num));
         for(i in 1:device.num){
-                if(i != device.num){
-                        para[[i]] <- list(x = x, y = y, n.comb = n.comb, ll.threshhold = ll.threshhold, fold = fold, device.id = device.id[i], fixed.features = as.matrix(fixed.features[((i-1)*task.piece + 1):(i*task.piece),]))
-                }else{
-                        para[[i]] <- list(x = x, y = y, n.comb = n.comb, ll.threshhold = ll.threshhold, fold = fold, device.id = device.id[i], fixed.features = as.matrix(fixed.features[((i-1)*task.piece + 1):(nrow(fixed.features)),]))
-                }
+            if(i != device.num){
+                para[[i]] <- list(x = x, y = y, n.comb = n.comb, ll.threshhold = ll.threshhold, fold = fold, device.id = device.id[i], fixed.features = as.matrix(fixed.features[((i-1)*task.piece + 1):(i*task.piece),]))
+            }else{
+                para[[i]] <- list(x = x, y = y, n.comb = n.comb, ll.threshhold = ll.threshhold, fold = fold, device.id = device.id[i], fixed.features = as.matrix(fixed.features[((i-1)*task.piece + 1):(nrow(fixed.features)),]))
+            }
                 
         }
         
@@ -101,7 +101,7 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
 
         ll.min.one <- min(result.one$logloss)
         
-        print(result.one$logloss)
+        #print(result.one$logloss)
 
         print(paste("logloss.min.one", ll.min.one))
         if(pre.min.ll - ll.min.one <= ll.diff){

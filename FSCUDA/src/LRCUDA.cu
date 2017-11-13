@@ -789,6 +789,7 @@ ll[tid] += loss;
 
 __global__ void LRNCV(int* dev_combn, int valid_num, int np, float** X,
 	float* Y, int all_valid, int** train, int* training_num, int** test, int* test_num, int fold, float* ll) {
+	printf("LRNCV, I'm here");
 	for (int i = 0; i < fold; i++) {
 		fitLMNWithCV(dev_combn, valid_num, np, X, Y, all_valid, train,
 			training_num[i], test, test_num[i], i, ll);
@@ -909,7 +910,7 @@ void SearchCombn(int n, long long start, long long stop) {
 
 		}
 		if (num != 0) {
-			printf("num = %d\n", num);
+			printf("11111");
 			cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,
 				cudaMemcpyHostToDevice);
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
@@ -924,8 +925,6 @@ void SearchCombn(int n, long long start, long long stop) {
 					result.num += 1;
 					if (result.num >= result.size) {
 						result.size += 10000;
-						//result.feature1 = (int*)realloc(result.feature1, result.size*sizeof(int));
-						//result.error_num = (int*)realloc(result.error_num, result.size*sizeof(int));
 						result.features_error = (float*) realloc(
 							result.features_error,
 							result.size * sizeof(float) * (n + 1));
