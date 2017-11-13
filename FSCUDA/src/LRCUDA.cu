@@ -1873,7 +1873,7 @@ extern "C" {
 		
 		SearchCombn(n_comb, *INTEGER(start), *INTEGER(stop));
 
-		SEXP result = c();
+		SEXP result = TransferResultToR();
 		
 		return result;
 
