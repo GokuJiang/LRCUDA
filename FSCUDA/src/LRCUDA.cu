@@ -913,14 +913,16 @@ void SearchCombn(int n, long long start, long long stop) {
 		
 		printf("last num = %d",num);
 		if (num != 0) {
-			printf("11111");
 			cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,
 				cudaMemcpyHostToDevice);
+			printf("11111\n");
 			InitThreadConfig((num - 1) / maxThreadsPerBlock + 1, 1, 1,
 				maxThreadsPerBlock, 1, 1);
 			LRNCV<<<thread_config.dim_grid, thread_config.dim_block>>>(
 				dev_combn, num, n+1, X, Y, all_valid, train,
 				training_num, test, test_num, fold, dev_ll);
+			printf("22222\n");
+
 			cudaMemcpy(ll, dev_ll, sizeof(float) * num_combn,
 				cudaMemcpyDeviceToHost);
 			for (int index = 0; index < num; ++index) {
