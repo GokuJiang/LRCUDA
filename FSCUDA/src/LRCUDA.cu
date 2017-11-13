@@ -854,6 +854,7 @@ void SearchCombn(int n, long long start, long long stop) {
 	long long counter = 0;
 
 	if (1 == n) {
+		printf("1024");
 		for (int i = 1; i <= features_num; i++) {
 
 			counter++;
@@ -909,6 +910,8 @@ void SearchCombn(int n, long long start, long long stop) {
 			}
 
 		}
+		
+		printf("last num = %d",num);
 		if (num != 0) {
 			printf("11111");
 			cudaMemcpy(dev_combn, combn, sizeof(int) * n * num_combn,

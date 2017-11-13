@@ -109,7 +109,6 @@ iFes <- function(x, y, ll.diff = 0.001, fold = 10, device.id = 0, cl = NULL){
         #save(result.one, file = "result.one.feature.RData")
     }
     
-    print(paste("resutl.one\n",result.one))
     result.l[[1]] <- result.one
 
     pre.min.ll <- ll.min.one
